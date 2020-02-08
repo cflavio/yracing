@@ -1,6 +1,5 @@
 import sys, os.path, os
 sys.path += [os.path.abspath(os.path.join(os.getcwd(), os.pardir)) + '/yyagl']
-print sys.path
 from collections import namedtuple
 from build.build import extensions, files, img_tgt_names, \
     set_path, src_fpath, devinfo_fpath, docs_fpath, pdf_fpath, test_fpath
