@@ -48,10 +48,10 @@ binfo_lst = [
 build_lst = [PDFInfo(binfo[0], 'build', binfo[1], [])
              for binfo in binfo_lst]
 pdf_conf = {
-    'racing': racing_lst,
-    'racing_car': [PDFInfo('python', './car', '*.py', [])],
-    'racing_race': [PDFInfo('python', './race', '*.py', [])],
-    'racing_track': [PDFInfo('python', './track', '*.py', [])]}
+    'yracing': racing_lst,
+    'yracing_car': [PDFInfo('python', './car', '*.py', [])],
+    'yracing_race': [PDFInfo('python', './race', '*.py', [])],
+    'yracing_track': [PDFInfo('python', './track', '*.py', [])]}
 env['PDF_CONF'] = pdf_conf
 
 cond_racing = lambda s: not str(s).startswith('yyagl/racing/')
