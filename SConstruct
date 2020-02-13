@@ -1,11 +1,11 @@
 import sys, os.path, os
 sys.path += [os.path.abspath(os.path.join(os.getcwd(), os.pardir)) + '/yyagl']
+sys.path.append('..')
 from collections import namedtuple
 from build.build import extensions, files, img_tgt_names, \
-    set_path, src_fpath, devinfo_fpath, docs_fpath, pdf_fpath, test_fpath
+    set_path, src_fpath, devinfo_fpath, docs_fpath, pdf_fpath
 from build.src import bld_src
 from build.devinfo import bld_devinfo
-from build.test import bld_ut
 from build.docs import bld_docs
 from build.imgs import bld_images
 from build.pdf import bld_pdfs
@@ -23,7 +23,6 @@ app_name = 'yracing'
 pargs = {'dst_dir': path, 'appname': app_name}
 src_path = src_fpath.format(**pargs)
 devinfo_path = devinfo_fpath.format(**pargs)
-tests_path = test_fpath.format(**pargs)
 docs_path = docs_fpath.format(**pargs)
 pdf_path = pdf_fpath.format(**pargs)
 
