@@ -158,6 +158,9 @@ class TrackPhys(PhysColleague, ComputerProxy):
 
     def __set_corners(self):
         corners = self.race_props.corner_names
+        legacy_tracks = ['dubai', 'moon', 'nagano', 'orlando', 'rome', 'sheffield', 'toronto']
+        if self.race_props.track_name not in legacy_tracks:
+            corners = ['top_left', 'top_right', 'bottom_right', 'bottom_left']
         self.corners = [self.model.find('**/' + crn) for crn in corners]
 
     def __set_waypoints(self):

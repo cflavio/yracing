@@ -666,8 +666,12 @@ class CarLogic(LogicColleague, ComputerProxy):
     @property
     def correct_lap(self):
         wps = self.cprops.track_waypoints
-        all_wp = [int(w_p.get_name()[8:]) for w_p in wps]
-        f_wp = [int(w_p.get_name()[8:]) for w_p in self.__fork_wp()]
+        try:
+            all_wp = [int(w_p.get_name()[8:]) for w_p in wps]
+            f_wp = [int(w_p.get_name()[8:]) for w_p in self.__fork_wp()]
+        except ValueError:  # new tracks
+            all_wp = [int(w_p.get_name()[2:]) for w_p in wps]
+            f_wp = [int(w_p.get_name()[2:]) for w_p in self.__fork_wp()]
         list(map(all_wp.remove, f_wp))
         is_correct = all(w_p in self.collected_wps for w_p in all_wp)
         if not is_correct:
