@@ -45,6 +45,7 @@ class Camera(GameObject):
         regions = base.win.get_active_display_regions()
         if self.eng.cfg.dev_cfg.shaders_dev:
             return self.eng.shader_mgr.filter_mgr.camera
+        if self.eng.cfg.dev_cfg.pbr: return base.camera
         return regions[self.car.player_car_idx].get_camera()
 
     @staticmethod

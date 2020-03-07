@@ -1,7 +1,7 @@
 from logging import info
 from yyagl.gameobject import GameObject
 from yyagl.facade import Facade
-from .gfx import TrackGfx, TrackGfxShader, TrackGfxDebug
+from .gfx import TrackGfx, TrackGfxShader, TrackGfxDebug, TrackGfxPbr
 from .phys import TrackPhys
 from .audio import TrackAudio
 
@@ -26,7 +26,9 @@ class Track(GameObject, TrackFacade):
     def __init__(self, race_props):
         info('init track')
         self.race_props = self.__rpr = race_props
-        self.__gfx_cls = TrackGfxShader if self.__rpr.shaders_dev else TrackGfx
+        self.__gfx_cls = TrackGfx
+        if self.__rpr.shaders_dev: self.__gfx_cls = TrackGfxShader
+        if self.__rpr.pbr: self.__gfx_cls = TrackGfxPbr
         self.__gfx_cls = TrackGfxDebug if self.__rpr.show_waypoints else self.__gfx_cls
         GameObject.__init__(self)
         taskMgr.add(self.__build_comps())

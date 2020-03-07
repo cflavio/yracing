@@ -1,3 +1,4 @@
+import simplepbr
 from logging import info
 from yyagl.gameobject import FsmColleague
 from yracing.race.logic import NetMsgs
@@ -7,9 +8,10 @@ from yracing.player.player import Player
 
 class RaceFsm(FsmColleague):
 
-    def __init__(self, mediator, shaders):
+    def __init__(self, mediator, shaders, pbr):
         self.countdown = None
         self.shaders = shaders
+        self.pbr = pbr
         self.menu_props = None
         self.countdown_sfx = None
         FsmColleague.__init__(self, mediator)
@@ -45,6 +47,7 @@ class RaceFsm(FsmColleague):
         self.mediator.logic.enter_play()
         if self.shaders:
             self.eng.shader_mgr.toggle_shader()
+        if self.pbr: simplepbr.init()
         cars = self.mediator.logic.player_cars + self.mediator.logic.cars
         list(map(lambda car: car.reset_car(), cars))
         list(map(lambda car: car.demand('Countdown'), cars))

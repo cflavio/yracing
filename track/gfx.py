@@ -170,3 +170,13 @@ class TrackGfxShader(TrackGfx):
         self.eng.set_dir_lgt((.8, .8, .8, 1), (-25, -65, 0))
 
     def _destroy_lights(self): self.eng.clear_lights()
+
+
+class TrackGfxPbr(TrackGfx):
+
+    def update(self, car_pos): pass
+
+    def _set_light(self):
+        self.eng.set_dir_lgt((.8, .8, .8, 1), (-25, -65, 0))
+
+    def _destroy_lights(self): self.eng.clear_lights()

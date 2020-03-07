@@ -28,7 +28,7 @@ class Race(GameObject, RaceFacade):
     def __init__(self, race_props, players):
         rpr = race_props
         GameObject.__init__(self)
-        self.fsm = self.fsm_cls(self, rpr.shaders_dev)
+        self.fsm = self.fsm_cls(self, rpr.shaders_dev, rpr.pbr)
         self.gui = self.gui_cls(self, rpr, players)
         self.logic = self.logic_cls(self, rpr)
         self.event = self.event_cls(self, rpr.ingame_menu, rpr.keys, players)
