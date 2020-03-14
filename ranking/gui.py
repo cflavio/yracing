@@ -3,7 +3,7 @@ from panda3d.core import TextNode, Shader, TextureStage
 from yyagl.lib.gui import Btn, Text, Img
 from yyagl.lib.p3d.shader import load_shader
 from yyagl.gameobject import GuiColleague
-from yyagl.engine.gui.page import Page, PageGui, PageEvent
+from yyagl.engine.gui.page import Page, PageGui, PageEvent, PageFacade
 from yyagl.gameobject import GameObject
 from yyagl.engine.gui.menu import Menu
 from yracing.player.player import Player
@@ -70,6 +70,7 @@ class RankingPage(Page):
         GameObject.__init__(self)
         self.event = PageEvent(self)
         self.gui = RankingPageGui(self, menu_props, rprops, sprops, ranking, players)
+        PageFacade.__init__(self)
         # invece Page's __init__
 
     def attach_obs(self, mth):
@@ -82,6 +83,7 @@ class RankingPage(Page):
         self.event.destroy()
         self.gui.destroy()
         GameObject.destroy(self)
+        PageFacade.destroy(self)
 
 
 class RankingMenuGui(GuiColleague):

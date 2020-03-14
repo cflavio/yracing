@@ -1,6 +1,6 @@
 from panda3d.core import TextNode
 from yyagl.lib.gui import Text, Img
-from yyagl.engine.gui.page import Page, PageGui
+from yyagl.engine.gui.page import Page, PageGui, PageFacade
 from yyagl.gameobject import GameObject, EventColleague
 from yracing.ranking.gui import RankingGui
 from yracing.player.player import Player, TuningPlayer
@@ -161,9 +161,11 @@ class LoadingPage(Page):
         GameObject.__init__(self)
         self.event = EventColleague(self)
         self.gui = gui_cls(self, menu, rprops, track_name_transl, ranking, players)
+        PageFacade.__init__(self)
         # call Page's __init__
 
     def destroy(self):
         self.event.destroy()
         self.gui.destroy()
         GameObject.destroy(self)
+        PageFacade.destroy(self)
