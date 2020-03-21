@@ -9,10 +9,9 @@ from .loading.loading import Loading
 from .minimap import Minimap
 
 
-class RaceGuiFacade(Facade):
+class RaceGuiFacade:
 
-    def __init__(self):
-        Facade.__init__(self, mth_lst=[('update_minimap', lambda obj: obj.minimap.update)])
+    def update_minimap(self, positions): return self.minimap.update(positions)
 
 
 class RaceGui(GuiColleague, RaceGuiFacade):
