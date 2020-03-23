@@ -1,24 +1,25 @@
 from logging import info
 from yyagl.gameobject import GameObject
-from yyagl.facade import Facade
 from .gfx import TrackGfx, TrackGfxShader, TrackGfxDebug, TrackGfxPbr
 from .phys import TrackPhys
 from .audio import TrackAudio
 
 
-class TrackFacade(Facade):
+class TrackFacade:
 
-    def __init__(self):
-        prop_lst = [('bounds', lambda obj: obj.phys.bounds)]
-        mth_lst = [
-            ('get_start_pos_hpr', lambda obj: obj.phys.get_start_pos_hpr),
-            ('play_music', lambda obj: obj.audio.music.play),
-            ('stop_music', lambda obj: obj.audio.music.stop),
-            ('update', lambda obj: obj.event.update),
-            ('attach_obs', lambda obj: obj.attach),
-            ('detach_obs', lambda obj: obj.detach),
-            ('reparent_to', lambda obj: obj.gfx.model.reparent_to)]
-        Facade.__init__(self, prop_lst, mth_lst)
+    @property
+    def bounds(self): return self.phys.bounds
+
+    def get_start_pos_hpr(self, idx): return self.phys.get_start_pos_hpr(idx)
+    def play_music(self): return self.audio.music.play()
+    def stop_music(self): return self.audio.music.stop()
+    def update(self): return self.event.update()
+    def reparent_to(self, node): return self.gfx.model.reparent_to(node)
+
+    def attach_obs(self, obs_meth, sort=10, rename='', args=[]):
+        return self.attach(obs_meth, sort, rename, args)
+    def detach_obs(self, obs_meth, lambda_call=None):
+        return self.detach(obs_meth, lambda_call)
 
 
 class Track(GameObject, TrackFacade):
@@ -32,7 +33,6 @@ class Track(GameObject, TrackFacade):
         self.__gfx_cls = TrackGfxDebug if self.__rpr.show_waypoints else self.__gfx_cls
         GameObject.__init__(self)
         taskMgr.add(self.__build_comps())
-        TrackFacade.__init__(self)
 
     async def __build_comps(self):
         gfx_task = taskMgr.add(self.__build_gfx)
@@ -49,4 +49,3 @@ class Track(GameObject, TrackFacade):
         self.phys.destroy()
         self.audio.destroy()
         GameObject.destroy(self)
-        TrackFacade.destroy(self)

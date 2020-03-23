@@ -4,7 +4,6 @@ from os.path import exists
 from panda3d.bullet import BulletRigidBodyNode
 from panda3d.core import NodePath
 from yyagl.gameobject import GfxColleague, GameObject
-from yyagl.facade import Facade
 from .skidmark import Skidmark
 from .decorator import Decorator
 from yracing.weapon.rocket.rocket import Rocket
@@ -16,13 +15,10 @@ from yyagl.lib.p3d.gfx import P3dNode
 from yyagl.engine.vec import Vec
 
 
-class CarGfxFacade(Facade):
+class CarGfxFacade:
 
-    def __init__(self):
-        mth_lst = [
-            ('on_skidmarking', lambda obj: obj.skidmark_mgr.on_skidmarking),
-            ('on_no_skidmarking', lambda obj: obj.skidmark_mgr.on_no_skidmarking)]
-        Facade.__init__(self, mth_lst=mth_lst)
+    def on_skidmarking(self): return self.skidmark_mgr.on_skidmarking()
+    def on_no_skidmarking(self): return self.skidmark_mgr.on_no_skidmarking()
 
 
 class CarGfx(GfxColleague, CarGfxFacade):

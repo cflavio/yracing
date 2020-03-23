@@ -1,22 +1,21 @@
 from yyagl.gameobject import GameObject
-from yyagl.facade import Facade
 from .gfx import WeaponGfx
 from .audio import WeaponAudio
 
 
-class WeaponFacade(Facade):
+class WeaponFacade:
 
-    def __init__(self):
-        prop_lst = [('id', lambda obj: obj.logic.wpn_id)]
-        mth_lst = [
-            ('attach_obs', lambda obj: obj.logic.attach),
-            ('detach_obs', lambda obj: obj.logic.detach),
-            ('fire', lambda obj: obj.logic.fire),
-            ('update_props', lambda obj: obj.logic.update_props),
-            ('update_fired_props', lambda obj: obj.logic.update_fired_props),
-            ('ai_fire', lambda obj: obj.ai.update),
-            ('reparent', lambda obj: obj.gfx.reparent)]
-        Facade.__init__(self, prop_lst, mth_lst)
+    @property
+    def id(self): return self.logic.wpn_id
+    def attach_obs(self, obs_meth, sort=10, rename='', args=[]):
+        return self.logic.attach(obs_meth, sort, rename, args)
+    def detach_obs(self, obs_meth, lambda_call=None):
+        return self.logic.detach(obs_meth, lambda_call)
+    def fire(self, sfx): return self.logic.fire(sfx)
+    def update_props(self, pos, fwd): return self.logic.update_props(pos, fwd)
+    def update_fired_props(self, pos, fwd): return self.logic.update_fired_props(pos, fwd)
+    def ai_fire(self): return self.ai.update()
+    def reparent(self, parent): return self.gfx.reparent(parent)
 
 
 class Weapon(GameObject, WeaponFacade):
@@ -31,7 +30,6 @@ class Weapon(GameObject, WeaponFacade):
         self.audio = self.audio_cls(self)
         self.logic = self.logic_cls(self, car, cars, wpn_id)
         self.ai = self.ai_cls(self, car)
-        WeaponFacade.__init__(self)
 
     def destroy(self):
         self.gfx.destroy()
@@ -39,7 +37,6 @@ class Weapon(GameObject, WeaponFacade):
         self.logic.destroy()
         self.ai.destroy()
         GameObject.destroy(self)
-        WeaponFacade.destroy(self)
 
 
 class PhysWeapon(Weapon):

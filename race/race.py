@@ -1,6 +1,5 @@
 from abc import ABCMeta
 from yyagl.gameobject import GameObject
-from yyagl.facade import Facade
 from .logic import RaceLogic, RaceLogicSinglePlayer, RaceLogicServer, \
     RaceLogicClient
 from .event import RaceEvent, RaceEventServer, RaceEventClient
@@ -8,14 +7,15 @@ from .gui.gui import RaceGui, RaceGuiServer
 from .fsm import RaceFsm, RaceFsmServer, RaceFsmClient
 
 
-class RaceFacade(Facade):
+class RaceFacade:
 
-    def __init__(self):
-        prop_lst = [('results', lambda obj: obj.gui.results)]
-        mth_lst = [
-            ('attach_obs', lambda obj: obj.event.attach),
-            ('detach_obs', lambda obj: obj.event.detach)]
-        Facade.__init__(self, prop_lst, mth_lst)
+    @property
+    def results(self): return self.gui.results
+
+    def attach_obs(self, obs_meth, sort=10, rename='', args=[]):
+        return self.event.attach(obs_meth, sort, rename, args)
+    def detach_obs(self, obs_meth, lambda_call=None):
+        return self.event.detach(obs_meth, lambda_call)
 
 
 class Race(GameObject, RaceFacade):
@@ -32,7 +32,6 @@ class Race(GameObject, RaceFacade):
         self.gui = self.gui_cls(self, rpr, players)
         self.logic = self.logic_cls(self, rpr)
         self.event = self.event_cls(self, rpr.ingame_menu, rpr.keys, players)
-        RaceFacade.__init__(self)
 
     def destroy(self):
         self.fsm.destroy()
@@ -40,7 +39,6 @@ class Race(GameObject, RaceFacade):
         self.logic.destroy()
         self.event.destroy()
         GameObject.destroy(self)
-        RaceFacade.destroy(self)
 
 
 class RaceSinglePlayer(Race):

@@ -1,21 +1,19 @@
 from abc import ABCMeta
 from yyagl.gameobject import GameObject
-from yyagl.facade import Facade
 from .gui import TuningGui
 
 
-class TuningFacade(Facade):
+class TuningFacade:
 
-    def __init__(self):
-        prop_lst = []  # [('car2tuning', lambda obj: obj.logic.car2tuning),
-        #            ('to_dct', lambda obj: obj.logic.to_dct)]
-        mth_lst = [
-            ('attach_obs', lambda obj: obj.gui.attach),
-            ('detach_obs', lambda obj: obj.gui.detach),
-            #('load', lambda obj: obj.logic.load),
-            ('show_gui', lambda obj: obj.gui.show),
-            ('hide_gui', lambda obj: obj.gui.hide)]
-        Facade.__init__(self, prop_lst, mth_lst)
+    # [('car2tuning', lambda obj: obj.logic.car2tuning),
+    #            ('to_dct', lambda obj: obj.logic.to_dct)]
+    def attach_obs(self, obs_meth, sort=10, rename='', args=[]):
+        return self.gui.attach(obs_meth, sort, rename, args)
+    def detach_obs(self, obs_meth, lambda_call=None):
+        return self.gui.detach(obs_meth, lambda_call)
+    #('load', lambda obj: obj.logic.load),
+    def show_gui(self): return self.gui.show()
+    def hide_gui(self): return self.gui.hide()
 
 
 class Tuning(GameObject, TuningFacade):
