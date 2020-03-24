@@ -1,6 +1,5 @@
 from logging import info
 from yyagl.gameobject import GameObject, AiColleague
-from yyagl.facade import Facade
 from .fsm import CarFsm, CarPlayerFsm
 from .gfx import CarGfx, CarPlayerGfx, CarNetworkGfx
 from .phys import CarPhys, CarPlayerPhys
@@ -32,32 +31,46 @@ class CarProps(object):
         self.ai_poller = ai_poller
 
 
-class CarFacade(Facade):
+class CarFacade:
 
-    def __init__(self):
-        prop_lst = [
-            ('lap_times', lambda obj: obj.logic.lap_times),
-            ('path', lambda obj: obj.gfx.path),
-            ('laps_num', lambda obj: obj.logic.laps_num),
-            ('name', lambda obj: obj.logic.cprops.name),
-            ('laps', lambda obj: obj.logic.cprops.race_props.laps),
-            ('pos', lambda obj: obj.gfx.nodepath.get_pos()),
-            ('heading', lambda obj: obj.gfx.nodepath.h)]
-        mth_lst = [
-            ('last_wp_not_fork', lambda obj: obj.logic.last_wp_not_fork),
-            ('not_fork_wps', lambda obj: obj.logic.not_fork_wps),
-            ('reparent', lambda obj: obj.gfx.reparent),
-            ('attach_obs', lambda obj: obj.event.attach),
-            ('detach_obs', lambda obj: obj.event.detach),
-            ('reset_car', lambda obj: obj.logic.reset_car),
-            ('start', lambda obj: obj.event.start),
-            ('get_pos', lambda obj: obj.gfx.nodepath.get_pos),
-            ('get_hpr', lambda obj: obj.gfx.nodepath.get_hpr),
-            ('closest_wp', lambda obj: obj.logic.closest_wp),
-            ('upd_ranking', lambda obj: obj.gui.upd_ranking),
-            ('get_linear_velocity', lambda obj: obj.phys.vehicle.get_chassis().get_linear_velocity),
-            ('demand', lambda obj: obj.fsm.demand)]
-        Facade.__init__(self, prop_lst, mth_lst)
+    @property
+    def lap_times(self): return self.logic.lap_times
+
+    @property
+    def path(self): return self.gfx.path
+
+    @property
+    def laps_num(self): return self.logic.laps_num
+
+    @property
+    def name(self): return self.logic.cprops.name
+
+    @property
+    def laps(self): return self.logic.cprops.race_props.laps
+
+    @property
+    def pos(self): return self.gfx.nodepath.get_pos()
+
+    @property
+    def heading(self): return self.gfx.nodepath.h
+
+    def attach_obs(self, obs_meth, sort=10, rename='', args=[]):
+        return self.event.attach(obs_meth, sort, rename, args)
+
+    def detach_obs(self, obs_meth, lambda_call=None):
+        return self.event.detach(obs_meth, lambda_call)
+
+    def last_wp_not_fork(self): return self.logic.last_wp_not_fork()
+    def not_fork_wps(self): return self.logic.not_fork_wps()
+    def reparent(self): return self.gfx.reparent()
+    def reset_car(self): return self.logic.reset_car()
+    def start(self): return self.event.start()
+    def get_pos(self): return self.gfx.nodepath.get_pos()
+    def get_hpr(self): return self.gfx.nodepath.get_hpr()
+    def closest_wp(self): return self.logic.closest_wp()
+    def upd_ranking(self, ranking): return self.gui.upd_ranking(ranking)
+    def get_linear_velocity(self): return self.phys.vehicle.get_chassis().get_linear_velocity()
+    def demand(self, tgt_state, *args): return self.fsm.demand(tgt_state, *args)
 
 
 class Car(GameObject, CarFacade):
@@ -90,7 +103,6 @@ class Car(GameObject, CarFacade):
         self.event = self.event_cls(self, self._car_props.race_props, self.__players)
         self.ai = self.ai_cls(self, self._car_props, self.__players)
         self.audio = self.audio_cls(self, self._car_props.race_props)
-        CarFacade.__init__(self)
         self._car_props.callback()
 
     def __build_gfx(self, task):
@@ -106,7 +118,6 @@ class Car(GameObject, CarFacade):
         self.ai.destroy()
         self.audio.destroy()
         GameObject.destroy(self)
-        CarFacade.destroy(self)
 
 
 class CarPlayer(Car):

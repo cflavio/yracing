@@ -1,5 +1,4 @@
 from yyagl.gameobject import GameObject
-from yyagl.facade import Facade
 from .logic import SeasonLogic
 
 
@@ -23,23 +22,34 @@ class SeasonProps(object):
         self.room = room
 
 
-class SeasonFacade(Facade):
+class SeasonFacade:
 
-    def __init__(self):
-        prop_lst = [
-            ('ranking', lambda obj: obj.logic.ranking),
-            ('tuning', lambda obj: obj.logic.tuning),
-            ('props', lambda obj: obj.logic.props),
-            ('race', lambda obj: obj.logic.race)]
-        mth_lst = [
-            ('attach_obs', lambda obj: obj.logic.attach),
-            ('detach_obs', lambda obj: obj.logic.detach),
-            ('start', lambda obj: obj.logic.start),
-            ('load', lambda obj: obj.logic.load),
-            ('create_race_server', lambda obj: obj.logic.create_race_server),
-            ('create_race_client', lambda obj: obj.logic.create_race_client),
-            ('create_race', lambda obj: obj.logic.create_race)]
-        Facade.__init__(self, prop_lst, mth_lst)
+    @property
+    def ranking(self): return self.logic.ranking
+
+    @property
+    def tuning(self): return self.logic.tuning
+
+    @property
+    def props(self): return self.logic.props
+
+    @property
+    def race(self): return self.logic.race
+
+    def attach_obs(self, obs_meth, sort=10, rename='', args=[]):
+        return self.logic.attach(obs_meth, sort, rename, args)
+    def detach_obs(self, obs_meth, lambda_call=None):
+        return self.logic.detach(obs_meth, lambda_call)
+
+    def start(self, reset=True): return self.logic.start(reset)
+    def load(self, ranking, tuning, drivers):
+        return self.logic.load(ranking, tuning, drivers)
+    def create_race_server(self, race_props, players):
+        return self.logic.create_race_server(race_props, players)
+    def create_race_client(self, race_props, players):
+        return self.logic.create_race_client(race_props, players)
+    def create_race(self, race_props, players):
+        return self.logic.create_race(race_props, players)
 
     @property
     def drivers_skills(self):
@@ -56,12 +66,10 @@ class Season(GameObject, SeasonFacade):
     def __init__(self, season_props):
         GameObject.__init__(self)
         self.logic = self.logic_cls(self, season_props)
-        SeasonFacade.__init__(self)
 
     def destroy(self):
         self.logic.destroy()
         GameObject.destroy(self)
-        SeasonFacade.destroy(self)
 
 
 class SingleRaceSeason(Season):
