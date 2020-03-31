@@ -2,7 +2,6 @@ from panda3d.core import TextNode
 from direct.gui.OnscreenText import OnscreenText
 from direct.gui.OnscreenImage import OnscreenImage
 from yyagl.gameobject import GuiColleague
-from yyagl.facade import Facade
 from yracing.player.player import Player
 from .results import Results, ResultsServer
 from .loading.loading import Loading

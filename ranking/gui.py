@@ -70,7 +70,6 @@ class RankingPage(Page):
         GameObject.__init__(self)
         self.event = PageEvent(self)
         self.gui = RankingPageGui(self, menu_props, rprops, sprops, ranking, players)
-        PageFacade.__init__(self)
         # invece Page's __init__
 
     def attach_obs(self, mth):
@@ -83,7 +82,6 @@ class RankingPage(Page):
         self.event.destroy()
         self.gui.destroy()
         GameObject.destroy(self)
-        PageFacade.destroy(self)
 
 
 class RankingMenuGui(GuiColleague):

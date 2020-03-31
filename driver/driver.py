@@ -1,5 +1,4 @@
 from yyagl.gameobject import GameObject
-from yyagl.facade import Facade
 from .logic import DriverLogic
 
 

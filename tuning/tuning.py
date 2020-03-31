@@ -22,9 +22,7 @@ class Tuning(GameObject, TuningFacade):
     def __init__(self, props):
         GameObject.__init__(self)
         self.gui = TuningGui(self, props)
-        TuningFacade.__init__(self)
 
     def destroy(self):
         self.gui.destroy()
         GameObject.destroy(self)
-        TuningFacade.destroy(self)

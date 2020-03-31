@@ -161,11 +161,9 @@ class LoadingPage(Page):
         GameObject.__init__(self)
         self.event = EventColleague(self)
         self.gui = gui_cls(self, menu, rprops, track_name_transl, ranking, players)
-        PageFacade.__init__(self)
         # call Page's __init__
 
     def destroy(self):
         self.event.destroy()
         self.gui.destroy()
         GameObject.destroy(self)
-        PageFacade.destroy(self)
