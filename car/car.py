@@ -86,26 +86,26 @@ class Car(GameObject, CarFacade):
     def __init__(self, car_props, player_car_idx, tuning, players):
         info('init car ' + car_props.name)
         self.player_car_idx = player_car_idx
-        self.__tuning = tuning
+        self._tuning = tuning
         self._car_props = car_props
-        self.__players = players
+        self._players = players
         GameObject.__init__(self)
-        taskMgr.add(self.__build_comps())
+        taskMgr.add(self._build_comps())
 
-    async def __build_comps(self):
-        self.fsm = self.fsm_cls(self, self._car_props, self.__players)
-        gfx_task = taskMgr.add(self.__build_gfx)
+    async def _build_comps(self):
+        self.fsm = self.fsm_cls(self, self._car_props, self._players)
+        gfx_task = taskMgr.add(self._build_gfx)
         await gfx_task
-        self.phys = self.phys_cls(self, self._car_props, self.__tuning, self.__players)
+        self.phys = self.phys_cls(self, self._car_props, self._tuning, self._players)
         self.gfx.set_emitters()
-        self.logic = self.logic_cls(self, self._car_props, self.__players)
-        self.gui = self.gui_cls(self, self._car_props, self.__players)
-        self.event = self.event_cls(self, self._car_props.race_props, self.__players)
-        self.ai = self.ai_cls(self, self._car_props, self.__players)
+        self.logic = self.logic_cls(self, self._car_props, self._players)
+        self.gui = self.gui_cls(self, self._car_props, self._players)
+        self.event = self.event_cls(self, self._car_props.race_props, self._players)
+        self.ai = self.ai_cls(self)
         self.audio = self.audio_cls(self, self._car_props.race_props)
         self._car_props.callback()
 
-    def __build_gfx(self, task):
+    def _build_gfx(self, task):
         self.gfx = self.gfx_cls(self, self._car_props)
 
     def destroy(self):
@@ -157,6 +157,19 @@ class NetworkCar(Car):
 class AiCar(Car):
     ai_cls = CarAi
     event_cls = CarAiEvent
+
+    async def _build_comps(self):
+        self.fsm = self.fsm_cls(self, self._car_props, self._players)
+        gfx_task = taskMgr.add(self._build_gfx)
+        await gfx_task
+        self.phys = self.phys_cls(self, self._car_props, self._tuning, self._players)
+        self.gfx.set_emitters()
+        self.logic = self.logic_cls(self, self._car_props, self._players)
+        self.gui = self.gui_cls(self)
+        self.event = self.event_cls(self, self._car_props.race_props, self._players)
+        self.ai = self.ai_cls(self, self._car_props, self._players)
+        self.audio = self.audio_cls(self)
+        self._car_props.callback()
 
 
 class AiCarPlayer(AiCar, CarPlayer):
