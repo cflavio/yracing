@@ -1,5 +1,5 @@
 from panda3d.core import GeomVertexData, GeomVertexWriter, GeomVertexFormat, \
-    Geom, GeomTriangles, GeomNode, Mat4, Material, OmniBoundingVolume, Shader
+    Geom, GeomTriangles, GeomNode, Mat4, OmniBoundingVolume, Shader
 from direct.interval.MetaInterval import Sequence
 from direct.interval.FunctionInterval import Wait, Func
 from direct.interval.LerpInterval import LerpFunc
@@ -63,12 +63,12 @@ class Skidmark(GameObject):
 
     @staticmethod
     def __set_material(nodepath):
-        #mat = Material()
-        #mat.set_ambient((.35, .35, .35, .5))
-        #mat.set_diffuse((.35, .35, .35, .5))
-        #mat.set_specular((.35, .35, .35, .5))
-        #mat.set_shininess(12.5)
-        #nodepath.set_material(mat)
+        # mat = Material()
+        # mat.set_ambient((.35, .35, .35, .5))
+        # mat.set_diffuse((.35, .35, .35, .5))
+        # mat.set_specular((.35, .35, .35, .5))
+        # mat.set_shininess(12.5)
+        # nodepath.set_material(mat)
         nodepath.node.set_shader(Shader.make(Shader.SL_GLSL, vert, frag))
         nodepath.node.set_shader_input('alpha', .5)
 

@@ -1,8 +1,7 @@
-from logging import info
 from math import cos, pi
 from panda3d.core import Vec3, LVector3f, Mat4
 from yyagl.gameobject import GameObject
-from yyagl.engine.vec import Vec2, Vec
+from yyagl.engine.vec import Vec
 
 
 class Camera(GameObject):
@@ -31,9 +30,10 @@ class Camera(GameObject):
 
     @staticmethod
     def ease(val):
-        if val <= 0: return 0
-        elif val >= 1: return 1
-        else: return 1 - cos(val * pi)
+        if val <= 0: ret_val = 0
+        elif val >= 1: ret_val = 1
+        else: ret_val = 1 - cos(val * pi)
+        return ret_val
 
     def curr_speed(self, pos, tgt):
         dist = (tgt - pos).length()
@@ -81,21 +81,24 @@ class Camera(GameObject):
         rot_angle = self.new_val(0, angle, c_i_rot)
         new_vec = prj_vec.normalized()
         rot_new_vec = self.__rotate(new_vec, rot_angle * d_t)
-        new_vec_l = self.new_val(prj_vec.length(), prj_back_car_vec.length(), c_i_length * d_t)
+        # new_vec_l = self.new_val(prj_vec.length(), prj_back_car_vec.length(),
+        #                          c_i_length * d_t)
         new_vec = rot_new_vec * curr_l
         new_pos = look_at_pos + new_vec
-        new_pos.z = self.new_val(cam_pos.z, look_at_pos.z + back_car_vec.z, 8 * d_t)
+        new_pos.z = self.new_val(cam_pos.z, look_at_pos.z + back_car_vec.z,
+                                 8 * d_t)
         return new_pos
 
-    def __rotate(self, vec, deg):
+    @staticmethod
+    def __rotate(vec, deg):
         rot_mat = Mat4()
         rot_mat.set_rotate_mat(deg, (0, 0, 1))
         return rot_mat.xform_vec(vec)
 
     def update(self, speed_ratio, is_rolling, is_fast, is_rotating):
         d_t = globalClock.get_dt()
-        self.curr_speed_ratio = self.new_val(self.curr_speed_ratio, speed_ratio,
-                                             1 * d_t)
+        self.curr_speed_ratio = self.new_val(self.curr_speed_ratio,
+                                             speed_ratio, 1 * d_t)
         dist_diff = self.dist_max - self.dist_min
         look_dist_diff = self.look_dist_max - self.look_dist_min
         gfx_root = self.eng.gfx.root
@@ -138,11 +141,13 @@ class Camera(GameObject):
 
         c_i = curr_incr_slow if is_fast else curr_incr
         look_at_pos = car_pos + tgt_vec
-        new_pos = self._new_pos(look_at_pos, back_car_vec, self.curr_dist, c_i, 20)
+        new_pos = self._new_pos(look_at_pos, back_car_vec, self.curr_dist, c_i,
+                                20)
         # overwrite camera's position to set the physics
         if any(val for val in self.overwrite):
             ovw = self.overwrite
-            new_pos = car_pos.x + ovw[0], car_pos.y + ovw[1], car_pos.z + ovw[2]
+            new_pos = car_pos.x + ovw[0], car_pos.y + ovw[1], \
+                car_pos.z + ovw[2]
         if not is_rolling: self.get_camera().set_pos(new_pos)
         self.get_camera().look_at(car_pos + tgt_vec)
 
@@ -160,16 +165,18 @@ class Camera(GameObject):
             prefs = ['RoadOBJ', 'OffroadOBJ']
             if any(hit.getNode().getName().startswith(pref) for pref in prefs):
                 return hit.getHitPos().z
+        return 0
 
-    #def render_all(self, track_model):  # workaround for premunge_scene in 1.9
-        #self.get_camera().set_pos(0, 0, 10000)
-        #self.get_camera().look_at(0, 0, 0)
-        #skydome = track_model.find('**/OBJSkydome*')
-        #info('skydome %sfound' % ('' if skydome else 'not '))
-        #if skydome: skydome.hide()
-        #base.graphicsEngine.render_frame()
-        #base.graphicsEngine.render_frame()
-        #if skydome: skydome.show()
+    # def render_all(self, track_model):
+    #     workaround for premunge_scene in 1.9
+    #     self.get_camera().set_pos(0, 0, 10000)
+    #     self.get_camera().look_at(0, 0, 0)
+    #     skydome = track_model.find('**/OBJSkydome*')
+    #     info('skydome %sfound' % ('' if skydome else 'not '))
+    #     if skydome: skydome.hide()
+    #     base.graphicsEngine.render_frame()
+    #     base.graphicsEngine.render_frame()
+    #     if skydome: skydome.show()
 
     def destroy(self):
         GameObject.destroy(self)
@@ -184,7 +191,7 @@ class FPCamera(Camera):
     def __init__(self, car_np, cam_vec, car):
         Camera.__init__(self, car_np, cam_vec, car)
 
-    def _new_pos(self, back_car_vec, c_i):
+    def _new_pos(self, back_car_vec, c_i):  # parameters differ from overridden
         car_pos = self.car_np.get_pos()
         curr_cam_pos = car_pos + back_car_vec
         curr_occl = self.__occlusion_mesh(curr_cam_pos)
@@ -194,9 +201,10 @@ class FPCamera(Camera):
             back_car_vec = occl_pos - car_pos
             is_occl = True
         if not is_occl:
-            cam_vec = car_pos - curr_cam_pos
+            # cam_vec = car_pos - curr_cam_pos
             look_at_pos = car_pos  # + tgt_vec
-            new_pos = Camera._new_pos(self, look_at_pos, back_car_vec, self.curr_dist, c_i, 20)
+            new_pos = Camera._new_pos(self, look_at_pos, back_car_vec,
+                                      self.curr_dist, c_i, 20)
         else:
             new_pos = occl_pos
         return new_pos
@@ -209,19 +217,21 @@ class FPCamera(Camera):
         tgt = self.car.gfx.nodepath.get_pos()
         occl = self.__closest_occl(pos, tgt)
         if not occl:
-            return
+            return None
         car_vec = self.car.logic.car_vec
         rot_mat_left = Mat4()
         rot_mat_left.setRotateMat(90, (0, 0, 1))
         car_vec_left = rot_mat_left.xformVec(car_vec._vec)
+        # access to a protected member
         tgt_left = tgt + car_vec_left
         pos_left = pos + car_vec_left
         occl_left = self.__closest_occl(pos_left, tgt_left)
         if not occl_left:
-            return
+            return None
         rot_mat_right = Mat4()
         rot_mat_right.setRotateMat(-90, (0, 0, 1))
         car_vec_right = rot_mat_right.xformVec(car_vec._vec)
+        # access to a protected member
         car_vec_right += (0, 0, 2)
         tgt_right = tgt + car_vec_right
         pos_right = pos + car_vec_right
@@ -229,7 +239,7 @@ class FPCamera(Camera):
         occl_right = phys_root.ray_test_closest(tgt_right, pos_right)
         occl_right = self.__closest_occl(pos_right, tgt_right)
         if not occl_right:
-            return
+            return None
         return occl
 
     def __closest_occl(self, pos, tgt):

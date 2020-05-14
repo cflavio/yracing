@@ -29,7 +29,8 @@ class LoadingMenu(Menu):
 
     def __init__(self, rprops, loading, track_name_transl, ranking, players):
         GameObject.__init__(self)  # invoke Menu's __init__
-        self.gui = LoadingGui(self, rprops, loading, track_name_transl, ranking, players)
+        self.gui = LoadingGui(
+            self, rprops, loading, track_name_transl, ranking, players)
         self.logic = MenuLogic(self)
 
     def destroy(self):

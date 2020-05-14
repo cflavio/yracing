@@ -1,8 +1,8 @@
-from yyagl.lib.p3d.gfx import RenderToTexture
 from panda3d.core import TextureStage
+from yyagl.lib.p3d.gfx import RenderToTexture
 
 
-class Signs(object):  # signs where we write supporters' names
+class Signs:  # signs where we write supporters' names
 
     def __init__(self, nodes, draw_cb):
         self.nodes = nodes

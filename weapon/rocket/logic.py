@@ -1,6 +1,5 @@
 from math import pi
 from yracing.weapon.weapon.logic import WeaponLogic, WeaponLogicNetwork
-from yyagl.engine.vec import Vec
 
 
 class RocketLogic(WeaponLogic):
@@ -14,8 +13,9 @@ class RocketLogic(WeaponLogic):
         WeaponLogic.fire(self, sfx)
         self.mediator.phys.fire()
         self.tsk = self.eng.do_later(10, self.mediator.destroy)
-        self.particle = self.eng.particle(self.mediator.gfx.gfx_np,
-                                          'dust', (.9, .7, .2, .6), pi/20, .1, .001, 0, vel=3, part_duration=1.2)
+        self.particle = self.eng.particle(
+            self.mediator.gfx.gfx_np, 'dust', (.9, .7, .2, .6), pi/20, .1,
+            .001, 0, vel=3, part_duration=1.2)
 
     def destroy(self):
         if self.particle: self.particle.destroy()

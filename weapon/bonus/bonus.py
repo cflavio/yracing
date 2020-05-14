@@ -9,8 +9,8 @@ class BonusFacade:
 
     @property
     def pos(self): return self.phys.pos
-    def attach_obs(self, obs_meth, sort=10, rename='', args=[]):
-        return self.event.attach(obs_meth, sort, rename, args)
+    def attach_obs(self, obs_meth, sort=10, rename='', args=None):
+        return self.event.attach(obs_meth, sort, rename, args or [])
     def detach_obs(self, obs_meth, lambda_call=None):
         return self.event.detach(obs_meth, lambda_call)
 

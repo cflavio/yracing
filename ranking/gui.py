@@ -1,9 +1,9 @@
 from logging import info
-from panda3d.core import TextNode, Shader, TextureStage
+from panda3d.core import TextureStage
 from yyagl.lib.gui import Btn, Text, Img
 from yyagl.lib.p3d.shader import load_shader
 from yyagl.gameobject import GuiColleague
-from yyagl.engine.gui.page import Page, PageGui, PageEvent, PageFacade
+from yyagl.engine.gui.page import Page, PageGui, PageEvent
 from yyagl.gameobject import GameObject
 from yyagl.engine.gui.menu import Menu
 from yracing.player.player import Player
@@ -14,27 +14,27 @@ class RankingPageGui(PageGui):
     def __init__(self, mediator, menu_props, rprops, sprops, ranking, players):
         self.rprops = rprops
         self.sprops = sprops
-        #self.drivers = sprops.drivers
+        # self.drivers = sprops.drivers
         self.ranking = ranking
         self.menu_props = menu_props
         self.__players = players
         PageGui.__init__(self, mediator, menu_props)
 
-    def build(self, back_btn=True):
+    def build(self, back_btn=True):  # parameters differ from overridden
         self.eng.init_gfx()
         self.font = self.menu_props.font
         self.text_fg = self.menu_props.text_active_col
         self.text_bg = self.menu_props.text_normal_col
         self.text_err_col = self.menu_props.text_err_col
-        #items = self.ranking.carname2points.items()
+        # items = self.ranking.carname2points.items()
         items = [(player.car, player.points) for player in self.__players]
         sorted_ranking = reversed(sorted(items, key=lambda el: el[1]))
-        txt = Text(_('Ranking'), scale=.1, pos=(0, .76),
-                           font=self.font, fg=self.text_bg)
+        txt = Text(_('Ranking'), scale=.1, pos=(0, .76), font=self.font,
+                   fg=self.text_bg)
         self.add_widgets([txt])
         for i, car in enumerate(sorted_ranking):
-            txt, img = RankingGui.set_drv_txt_img(self, i, car[0], 0, .52,
-                                                  str(car[1]) + ' %s', self.__players)
+            txt, img = RankingGui.set_drv_txt_img(
+                self, i, car[0], 0, .52, str(car[1]) + ' %s', self.__players)
             self.add_widgets([txt, img])
         track = self.rprops.track_name
         ntracks = len(self.sprops.gameprops.season_tracks)
@@ -69,13 +69,14 @@ class RankingPage(Page):
         self.menu_props = menu_props
         GameObject.__init__(self)
         self.event = PageEvent(self)
-        self.gui = RankingPageGui(self, menu_props, rprops, sprops, ranking, players)
-        # invece Page's __init__
+        self.gui = RankingPageGui(
+            self, menu_props, rprops, sprops, ranking, players)
+        # Page's __init__ is not invoked
 
-    def attach_obs(self, mth):
+    def attach_obs(self, mth):  # parameters differ from overridden
         self.gui.attach_obs(mth)
 
-    def detach_obs(self, mth):
+    def detach_obs(self, mth):  # parameters differ from overridden
         self.gui.detach_obs(mth)
 
     def destroy(self):
@@ -91,7 +92,8 @@ class RankingMenuGui(GuiColleague):
         menu_props = sprops.gameprops.menu_props
         menu_props.btn_size = (-8.6, 8.6, -.42, .98)
         self.menu = Menu(menu_props)
-        self.rank_page = RankingPage(rprops, sprops, menu_props, ranking, players)
+        self.rank_page = RankingPage(
+            rprops, sprops, menu_props, ranking, players)
         self.eng.do_later(.01, self.menu.push_page, [self.rank_page])
 
     def destroy(self):
@@ -136,11 +138,15 @@ class RankingGui(GuiColleague):
         drv = next(
             player.driver for player in players
             if player.car == car_name)
-        player_car_names = [player.car for player in players if player.kind == Player.human]
+        player_car_names = [player.car for player in players
+                            if player.kind == Player.human]
         is_player_car = car_name in player_car_names
-        info('%s %s %s %s' % (text % drv.name, car_name, drv.img_idx, is_player_car))
+        info('%s %s %s %s' % (
+            text % drv.name, car_name, drv.img_idx, is_player_car))
         name = text % drv.name
-        if '@' in name: name = name.split('@')[0] + '\1smaller\1@' + name.split('@')[1] + '\2'
+        if '@' in name:
+            name = name.split('@')[0] + '\1smaller\1@' + name.split('@')[1] + \
+                '\2'
         txt = Text(
             name, align='left',
             scale=.072, pos=(pos_x, top - i * .16), font=page.font,

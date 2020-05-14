@@ -1,6 +1,3 @@
-from panda3d.core import TextNode
-from direct.gui.OnscreenText import OnscreenText
-from direct.gui.OnscreenImage import OnscreenImage
 from yyagl.gameobject import GuiColleague
 from yracing.player.player import Player
 from .results import Results, ResultsServer
@@ -20,7 +17,7 @@ class RaceGui(GuiColleague, RaceGuiFacade):
     def __init__(self, mediator, rprops, players):
         GuiColleague.__init__(self, mediator)
         self._players = players
-        r_p = self.props = rprops
+        self.props = rprops
         self.results = self.result_cls(rprops)
         self.loading = Loading()
         self.minimap = None
@@ -28,7 +25,8 @@ class RaceGui(GuiColleague, RaceGuiFacade):
 
     def start(self):
         car_names = [player.car for player in self._players]
-        player_car_name = [player.car for player in self._players if player.kind == Player.human]
+        player_car_name = [player.car for player in self._players
+                           if player.kind == Player.human]
         self.minimap = Minimap(
             self.mediator.track.bounds, self.props.minimap_path,
             self.props.minimap_image, self.props.col_dct,
@@ -36,7 +34,8 @@ class RaceGui(GuiColleague, RaceGuiFacade):
 
     def destroy(self):
         self.results.destroy()
-        if self.minimap: self.minimap.destroy()  # e.g. server has quit on loading
+        if self.minimap: self.minimap.destroy()
+        # e.g. server has quit on loading
         GuiColleague.destroy(self)
 
 

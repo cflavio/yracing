@@ -1,7 +1,6 @@
-from panda3d.core import Vec3, NodePath
-from direct.interval.LerpInterval import LerpPosInterval, LerpHprInterval
+from panda3d.core import Vec3
+from direct.interval.LerpInterval import LerpPosInterval
 from direct.interval.IntervalGlobal import LerpFunc
-from direct.actor.Actor import Actor
 from yyagl.gameobject import GfxColleague
 from yyagl.engine.vec import Vec
 
@@ -13,9 +12,10 @@ class WeaponGfx(GfxColleague):
         self.parent = parent
         self.fpath = fpath
         GfxColleague.__init__(self, mediator)
-        self.gfx_np = self.eng.load_model(self.fpath, anim={'anim': self.fpath + '-Anim'})
+        self.gfx_np = self.eng.load_model(self.fpath,
+                                          anim={'anim': self.fpath + '-Anim'})
         self.gfx_np.loop('anim')
-        #self.gfx_np.flatten_light()
+        # self.gfx_np.flatten_light()
         self.gfx_np.reparent_to(self.parent)
         self.gfx_np.set_h(self.mediator.deg)
         self.gfx_np.set_scale(1.5)

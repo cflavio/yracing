@@ -1,6 +1,5 @@
 from yyagl.gameobject import FsmColleague
 from yracing.car.ai import CarResultsAi
-from .event import InputBuilder
 
 
 class CarFsm(FsmColleague):
@@ -18,12 +17,13 @@ class CarFsm(FsmColleague):
         self.mediator.audio.on_play()
 
     def enterWaiting(self):
-        state = self.getCurrentOrNextState()
-        #self.mediator.event.input_bld = InputBuilder.create(state, has_j)
+        # state = self.getCurrentOrNextState()
+        # self.mediator.event.input_bld = InputBuilder.create(state, has_j)
         self.mediator.ai.destroy()
-        self.mediator.ai = CarResultsAi(self.mediator, self.cprops, self.__players)
+        self.mediator.ai = CarResultsAi(
+            self.mediator, self.cprops, self.__players)
         self.mediator.gui.hide()
-        #self.mediator.gui.panel.enter_waiting()
+        # self.mediator.gui.panel.enter_waiting()
 
 
 class CarPlayerFsm(CarFsm):

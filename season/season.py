@@ -2,7 +2,7 @@ from yyagl.gameobject import GameObject
 from .logic import SeasonLogic
 
 
-class SeasonProps(object):
+class SeasonProps:
 
     def __init__(
             self, gameprops, cars_number, tuning_imgs, font, countdown_sfx,
@@ -36,8 +36,8 @@ class SeasonFacade:
     @property
     def race(self): return self.logic.race
 
-    def attach_obs(self, obs_meth, sort=10, rename='', args=[]):
-        return self.logic.attach(obs_meth, sort, rename, args)
+    def attach_obs(self, obs_meth, sort=10, rename='', args=None):
+        return self.logic.attach(obs_meth, sort, rename, args or [])
     def detach_obs(self, obs_meth, lambda_call=None):
         return self.logic.detach(obs_meth, lambda_call)
 

@@ -12,5 +12,6 @@ class Turbo(Weapon):
     ai_cls = TurboAi
     audio_cls = TurboAudio
 
+
 class TurboNetwork(Turbo):
     logic_cls = TurboLogicNetwork

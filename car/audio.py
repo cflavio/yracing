@@ -2,7 +2,7 @@ from yyagl.gameobject import AudioColleague
 from yyagl.engine.audio import AudioSound
 
 
-class CarSounds(object):
+class CarSounds:
 
     def __init__(self, engine, brake, crash, crash_hs, lap, landing, pitstop,
                  rocket_fired, rocket_hit, turbo, rotate_all_fired,
@@ -21,7 +21,7 @@ class CarSounds(object):
         self.rotate_all_hit = rotate_all_hit
 
 
-class AbsAudioUpdate(object):
+class AbsAudioUpdate:
 
     def __init__(self, engine_sfx, brake_sfx):
         self.engine_sfx = engine_sfx
@@ -67,7 +67,8 @@ class RaceAudioUpdate(AbsAudioUpdate):
         gear_thresholds = [0, .3, .6, .8, .9]
         thr = max(gtr for gtr in gear_thresholds if speed_ratio >= gtr)
         idx = gear_thresholds.index(thr)
-        up_ = 1 if idx == len(gear_thresholds) - 1 else gear_thresholds[idx + 1]
+        up_ = 1 if idx == len(gear_thresholds) - 1 else \
+            gear_thresholds[idx + 1]
         gear_ratio = (speed_ratio - thr) / (up_ - thr)
         self.engine_sfx.set_volume(.4 + .6 * speed_ratio)
         play_rate = speed_ratio - .1 + .2 * gear_ratio
@@ -95,7 +96,9 @@ class CarPlayerAudio(CarAudio):
         self.turbo_sfx = AudioSound(props.sounds.turbo)
         self.rotate_all_fired_sfx = AudioSound(props.sounds.rotate_all_fired)
         self.rotate_all_hit_sfx = AudioSound(props.sounds.rotate_all_hit)
-        list(map(lambda sfx: sfx.set_loop(True), [self.engine_sfx, self.brake_sfx]))
+        list(map(
+            lambda sfx: sfx.set_loop(True),
+            [self.engine_sfx, self.brake_sfx]))
         self.engine_sfx.set_volume(0)
         self.engine_sfx.play()
         self.update_state = CountDownAudioUpdate(self.engine_sfx,

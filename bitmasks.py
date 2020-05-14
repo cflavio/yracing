@@ -1,4 +1,4 @@
-class BitMasks(object):
+class BitMasks:
 
     general = 0
     track = 1

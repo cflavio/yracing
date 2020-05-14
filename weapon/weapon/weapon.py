@@ -7,13 +7,14 @@ class WeaponFacade:
 
     @property
     def id(self): return self.logic.wpn_id
-    def attach_obs(self, obs_meth, sort=10, rename='', args=[]):
-        return self.logic.attach(obs_meth, sort, rename, args)
+    def attach_obs(self, obs_meth, sort=10, rename='', args=None):
+        return self.logic.attach(obs_meth, sort, rename, args or [])
     def detach_obs(self, obs_meth, lambda_call=None):
         return self.logic.detach(obs_meth, lambda_call)
     def fire(self, sfx): return self.logic.fire(sfx)
     def update_props(self, pos, fwd): return self.logic.update_props(pos, fwd)
-    def update_fired_props(self, pos, fwd): return self.logic.update_fired_props(pos, fwd)
+    def update_fired_props(self, pos, fwd):
+        return self.logic.update_fired_props(pos, fwd)
     def ai_fire(self): return self.ai.update()
     def reparent(self, parent): return self.gfx.reparent(parent)
 
@@ -25,6 +26,7 @@ class Weapon(GameObject, WeaponFacade):
     deg = 0
 
     def __init__(self, car, path, cars, part_path, wpn_id, players):
+        # unused part_path, players
         GameObject.__init__(self)
         self.gfx = self.gfx_cls(self, car.gfx.nodepath, path)
         self.audio = self.audio_cls(self)

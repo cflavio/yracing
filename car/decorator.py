@@ -9,7 +9,7 @@ class Decorator(GameObject):
         anim_dct = {'anim': fpath + '-Anim'}
         self.gfx_np = self.eng.load_model(fpath, anim=anim_dct)
         self.gfx_np.loop('anim')
-        #self.gfx_np.flatten_light()
+        # self.gfx_np.flatten_light()
         self.gfx_np.reparent_to(parent)
         self.gfx_np.set_scale(1.5)
         self.gfx_np.set_pos(Vec(0, 0, 1.5))

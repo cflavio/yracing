@@ -2,11 +2,11 @@ from logging import info, debug
 from panda3d.core import BitMask32, LPoint3f
 from yyagl.computer_proxy import ComputerProxy, compute_once
 from yyagl.gameobject import PhysColleague, GameObject
-from yracing.weapon.bonus.bonus import Bonus
-from yracing.bitmasks import BitMasks
 from yyagl.engine.phys import TriangleMesh, TriangleMeshShape, GhostNode, \
     RigidBodyNode
 from yyagl.lib.p3d.vec import P3dVec3
+from yracing.weapon.bonus.bonus import Bonus
+from yracing.bitmasks import BitMasks
 
 
 class MeshBuilder(GameObject):
@@ -40,6 +40,7 @@ class MeshBuilder(GameObject):
             meth = self.eng.phys_mgr.attach_rigid_body
             lst = self.rigid_bodies
         nodepath = self.eng.attach_node(ncls(geom_name)._node)
+        # access to a protected member
         self.nodes += [nodepath]
         nodepath.add_shape(shape)
         meth(nodepath.p3dnode)
@@ -76,13 +77,13 @@ class MeshBuilderUnmerged(MeshBuilder):
         for geom in geoms:
             self._build_mesh(geom, geom_name, is_ghost, False)
 
-    def _add_geoms(self, geoms, mesh, geom_name):
+    def _add_geoms(self, geoms, mesh, geom_name):  # unused geom_name
         for _geom in [g.decompose() for g in geoms.node().get_geoms()]:
             mesh.add_geom(_geom, False, geoms.get_transform(self.model.node))
         return geoms.get_name()
 
 
-class Waypoint(object):
+class Waypoint:
 
     def __init__(self, node):
         self.node = node
@@ -105,7 +106,8 @@ class Waypoint(object):
         self.prevs = [find_wp(name) for name in prev_names]
 
     def set_prevs_grid(self, nopitlane_wps):
-        self.prevs_grid = [wayp for wayp in self.prevs if wayp in nopitlane_wps]
+        self.prevs_grid = [wayp for wayp in self.prevs
+                           if wayp in nopitlane_wps]
 
     def get_name(self): return self.node.name
 
@@ -158,7 +160,8 @@ class TrackPhys(PhysColleague, ComputerProxy):
 
     def __set_corners(self):
         corners = self.race_props.corner_names
-        legacy_tracks = ['dubai', 'moon', 'nagano', 'orlando', 'rome', 'sheffield', 'toronto']
+        legacy_tracks = ['dubai', 'moon', 'nagano', 'orlando', 'rome',
+                         'sheffield', 'toronto']
         if self.race_props.track_name not in legacy_tracks:
             corners = ['top_left', 'top_right', 'bottom_right', 'bottom_left']
         self.corners = [self.model.find('**/' + crn) for crn in corners]
@@ -183,7 +186,8 @@ class TrackPhys(PhysColleague, ComputerProxy):
         for w_p in self.waypoints:
             w_p.prevs_nopitlane = self.nopitlane_wps(w_p)
         for w_p in self.waypoints:
-            w_p.prevs_all = list(set(self.nogrid_wps(w_p) + self.nopitlane_wps(w_p)))
+            w_p.prevs_all = list(set(
+                self.nogrid_wps(w_p) + self.nopitlane_wps(w_p)))
         for w_p in self.waypoints:
             w_p.prevs_onlygrid = self.grid_wps
         for w_p in self.waypoints:

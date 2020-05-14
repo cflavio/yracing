@@ -1,26 +1,26 @@
 from random import uniform
 from panda3d.core import Vec3, LineSegs, LPoint3f
 from yyagl.gameobject import AiColleague, GameObject
-from yracing.player.player import Player
 from yyagl.computer_proxy import ComputerProxy, once_a_frame
 from yyagl.engine.vec import Vec
+from yracing.player.player import Player
 
 
-class ObstInfo(object):
+class ObstInfo:
 
     def __init__(self, name, dist):
         self.name = name
         self.dist = dist
 
 
-class LastObstInfo(object):
+class LastObstInfo:
 
     def __init__(self, direction, time):
         self.direction = direction
         self.time = time
 
 
-class DirKeys(object):
+class DirKeys:
 
     def __init__(self, forward, left, rear, right):
         self.forward = forward
@@ -29,10 +29,11 @@ class DirKeys(object):
         self.right = right
 
 
-class CarAiPoller(object):
+class CarAiPoller:
 
     def __init__(self):
         self.idx = 0
+        self.cars = None
 
     def set_cars(self, cars):
         self.cars = cars
@@ -50,7 +51,7 @@ class CarAiPoller(object):
         self.cars = None
 
 
-class DebugLines(object):
+class DebugLines:
 
     def __init__(self, color):
         self.color = color
@@ -63,8 +64,8 @@ class DebugLines(object):
     def draw(self, start, end):
         segs = LineSegs()
         segs.set_color(*self.color)
-        segs.moveTo(start._vec)
-        segs.drawTo(end._vec)
+        segs.moveTo(start._vec)  # access to a protected member
+        segs.drawTo(end._vec)  # access to a protected member
         segs_node = segs.create()
         self.lines += [render.attachNewNode(segs_node)]
 
@@ -105,9 +106,10 @@ class AbsAiLogic(ComputerProxy, GameObject):
     def tgt_vec(self):
         return Vec(*(self.curr_tgt_wp.pos - self.car.pos)).normalize()
 
-    def _update_gnd(self, direction, hit_res):  # direction in left, center, right
+    def _update_gnd(self, direction, hit_res):
+        # direction in left, center, right
         if not hit_res: return
-        if len(self.sector2samples_gnd[direction]) > 0:
+        if self.sector2samples_gnd[direction]:
             self.sector2samples_gnd[direction].pop(0)
         self.sector2samples_gnd[direction] += [hit_res[0][0]]
 
@@ -151,13 +153,16 @@ class AbsAiLogic(ComputerProxy, GameObject):
         start = vpos - self.car_vec * .8
         offset_y.rotate(self.car.heading)
         half = (self.height_bounds[0] + self.height_bounds[1]) / 4
-        start = start + offset_y + Vec(0, 0, uniform(half, self.height_bounds[1]))
+        start = start + offset_y + Vec(
+            0, 0, uniform(half, self.height_bounds[1]))
         lgt = 4 + 41 * self.car.phys.speed_ratio
         lookahed_vec = self.car.logic.car_vec_3d * lgt
         deg = uniform(*sector2bounds[direction])
         lookahed_vec.rotate(deg)
-        lookahead_pos = Vec(*(self.car.pos)) + lookahed_vec + Vec(0, 0, self.height_bounds[0] - 2)
-        hit_res = self.eng.phys_mgr.ray_test_all(start, lookahead_pos, self.car.logic.bitmask)
+        lookahead_pos = Vec(*(self.car.pos)) + lookahed_vec + \
+            Vec(0, 0, self.height_bounds[0] - 2)
+        hit_res = self.eng.phys_mgr.ray_test_all(
+            start, lookahead_pos, self.car.logic.bitmask)
         result = []
         for hit in hit_res.get_hits():
             hpos = hit.get_hit_pos()
@@ -167,8 +172,11 @@ class AbsAiLogic(ComputerProxy, GameObject):
         if self.car.fsm.getCurrentOrNextState() != 'Results' and \
                 self.player_car[0] == self.car.name and self.__debug:
             self.debug_lines_obst.draw(start, lookahead_pos)
-        road_res = [res for res in result if any(road_n in res[0] for road_n in ['Road', 'Offroad'])][:1]
-        obs_res = [res for res in result if not any(road_n in res[0] for road_n in ['Road', 'Offroad'])][:1]
+        road_res = [res for res in result if any(road_n in res[0]
+                    for road_n in ['Road', 'Offroad'])][:1]
+        obs_res = [res for res in result
+                   if not any(road_n in res[0]
+                              for road_n in ['Road', 'Offroad'])][:1]
         return road_res, obs_res
 
     def destroy(self):
@@ -198,7 +206,7 @@ class FrontAiLogic(AbsAiLogic):
         left = right = False
         min_dist = min([dist_center, dist_left, dist_right])
         if not(min_dist < 5 and self.car.phys.speed < 0):
-            return
+            return None
         if dist_left == min_dist:
             left = True
         elif dist_right == min_dist:
@@ -230,14 +238,17 @@ class CarAi(AiColleague, ComputerProxy):
         AiColleague.__init__(self, mediator)
         ComputerProxy.__init__(self)
         race_props = car_props.race_props
-        player_car_name = [player.car for player in players if player.kind == Player.human][0]
+        player_car_name = [player.car for player in players
+                           if player.kind == Player.human][0]
         self.road_name = race_props.road_name
         self.waypoints = car_props.track_waypoints
         self.ai_poller = car_props.ai_poller
         self.cars = [player.car for player in players]
         self.__debug = race_props.ai_debug
-        self.front_logic = FrontAiLogic(self.mediator, self.cars, player_car_name, race_props.ai_debug)
-        self.rear_logic = RearAiLogic(self.mediator, self.cars, player_car_name, race_props.ai_debug)
+        self.front_logic = FrontAiLogic(
+            self.mediator, self.cars, player_car_name, race_props.ai_debug)
+        self.rear_logic = RearAiLogic(
+            self.mediator, self.cars, player_car_name, race_props.ai_debug)
         self.last_positions = []
         # last 12 positions (a position a second) for respawning if the car
         # can't move
@@ -261,10 +272,11 @@ class CarAi(AiColleague, ComputerProxy):
         ratios = [ratio_center, ratio_left, ratio_right]
         ratio_max = max(ratios)
         if ratio_left < .3 and ratio_right > .6:
-            return 'right'
+            ret_val = 'right'
         elif ratio_right < .3 and ratio_left > .6:
-            return 'left'
-        return ['center', 'left', 'right'][ratios.index(ratio_max)]
+            ret_val = 'left'
+        ret_val = ['center', 'left', 'right'][ratios.index(ratio_max)]
+        return ret_val
 
     def __n_samples_on_road(self, samples):
         return len([smp for smp in samples if smp.startswith(self.road_name)])
@@ -278,17 +290,23 @@ class CarAi(AiColleague, ComputerProxy):
                 logic.debug_lines_obst.clear()
         directions = [self.front_logic._sectors[self.front_logic._curr_sector]]
         self.front_logic._curr_sector = (self.front_logic._curr_sector + 1) % 3
+        # access to protected members
         hit_res = self.front_logic.hit_res(directions[0])
         self.front_logic._update_gnd(directions[0], hit_res[0])
+        # access to a protected member
         self.front_logic.clear()
         self.front_logic._update_obst(directions[0], hit_res[1])
-        if self.mediator.phys.speed < 10 or self.mediator.logic.has_rear_weapon:
+        # access to a protected member
+        if self.mediator.phys.speed < 10 or \
+                self.mediator.logic.has_rear_weapon:
             hit_res = self.rear_logic.hit_res(directions[0])
             self.rear_logic._update_gnd(directions[0], hit_res[0])
             self.rear_logic._update_obst(directions[0], hit_res[1])
+            # access to protected members
 
     def _eval_respawn(self):
-        if self.mediator.fsm.getCurrentOrNextState() in ['Loading', 'Countdown']:
+        if self.mediator.fsm.getCurrentOrNextState() in [
+                'Loading', 'Countdown']:
             return
         if self.eng.curr_time - self.last_pos_time < 1:
             return
@@ -345,8 +363,8 @@ class CarAi(AiColleague, ComputerProxy):
     def left_right(self, obstacles, brake, obstacles_back):
         if self.eng.curr_time - self.last_obst_info.time < .05:
             return self.last_obst_info.direction
-        curr_obs = obstacles_back if brake and self.mediator.phys.speed < 10 else \
-            obstacles
+        curr_obs = obstacles_back if brake and \
+            self.mediator.phys.speed < 10 else obstacles
         closest_center, closest_left, closest_right = curr_obs
         thr_far = 4 + self.mediator.phys.speed_ratio * 8
         thr_close = 2 + self.mediator.phys.speed_ratio * 2
@@ -430,18 +448,22 @@ class CarAi(AiColleague, ComputerProxy):
         # evaluate on_road
         gnd_dir = self.__eval_gnd()
         if gnd_dir == 'left':
-            if brake and self.mediator.phys.speed < 10 and not curr_has_obs_left:
+            if brake and self.mediator.phys.speed < 10 and \
+                    not curr_has_obs_left:
                 return False, True
-            elif brake and self.mediator.phys.speed < 10 and not curr_has_obs_right:
+            elif brake and self.mediator.phys.speed < 10 and \
+                    not curr_has_obs_right:
                 return True, False
             elif not brake and not curr_has_obs_left:
                 return True, False
             elif not brake and not curr_has_obs_right:
                 return False, True
         elif gnd_dir == 'right':
-            if brake and self.mediator.phys.speed < 10 and not curr_has_obs_left:
+            if brake and self.mediator.phys.speed < 10 and \
+                    not curr_has_obs_left:
                 return True, False
-            elif brake and self.mediator.phys.speed < 10 and not curr_has_obs_right:
+            elif brake and self.mediator.phys.speed < 10 and \
+                    not curr_has_obs_right:
                 return False, True
             elif not brake and not curr_has_obs_left:
                 return False, True
@@ -504,7 +526,8 @@ class CarAi(AiColleague, ComputerProxy):
 
     def destroy(self):
         self.eng.detach_obs(self.on_frame)
-        list(map(lambda logic: logic.destroy(), [self.front_logic, self.rear_logic]))
+        list(map(lambda logic: logic.destroy(),
+                 [self.front_logic, self.rear_logic]))
         AiColleague.destroy(self)
         ComputerProxy.destroy(self)
 

@@ -1,10 +1,9 @@
 from abc import ABCMeta
 from yyagl.gameobject import GameObject
-from .logic import RaceLogic, RaceLogicSinglePlayer, RaceLogicServer, \
-    RaceLogicClient
+from .logic import RaceLogic, RaceLogicSinglePlayer, RaceLogicClient
 from .event import RaceEvent, RaceEventServer, RaceEventClient
 from .gui.gui import RaceGui, RaceGuiServer
-from .fsm import RaceFsm, RaceFsmServer, RaceFsmClient
+from .fsm import RaceFsm, RaceFsmClient
 
 
 class RaceFacade:
@@ -12,8 +11,8 @@ class RaceFacade:
     @property
     def results(self): return self.gui.results
 
-    def attach_obs(self, obs_meth, sort=10, rename='', args=[]):
-        return self.event.attach(obs_meth, sort, rename, args)
+    def attach_obs(self, obs_meth, sort=10, rename='', args=None):
+        return self.event.attach(obs_meth, sort, rename, args or [])
     def detach_obs(self, obs_meth, lambda_call=None):
         return self.event.detach(obs_meth, lambda_call)
 

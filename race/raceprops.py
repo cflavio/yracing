@@ -1,17 +1,17 @@
-class RaceProps(object):
+class RaceProps:
 
     def __init__(
             self, season_props, keys, joystick, sounds, coll_path, coll_name,
             car_path, wheel_names, road_name, particle_path,
-            shaders_dev, pbr, shaders, music_path, gfx_track_path, track_coll_path,
-            unmerged_names, merged_names, ghost_names, corner_names, wp_info,
-            show_waypoints, weapon_info, start_name, track_name, track_path,
-            track_model_name, empty_name, anim_name, omni_tag, sign_cb,
-            sign_name, minimap_path, minimap_image, col_dct, camera_vec,
-            shadow_src, laps, skidmark_col, rocket_path, turbo_path, rotate_all_path,
-            mine_path, bonus_model, bonus_suff, a_i, ingame_menu, share_urls,
-            respawn_name, pitstop_name, wall_name, goal_name, bonus_name,
-            roads_names, grid, start_wp, ai_debug):
+            shaders_dev, pbr, shaders, music_path, gfx_track_path,
+            track_coll_path, unmerged_names, merged_names, ghost_names,
+            corner_names, wp_info, show_waypoints, weapon_info, start_name,
+            track_name, track_path, track_model_name, empty_name, anim_name,
+            omni_tag, sign_cb, sign_name, minimap_path, minimap_image, col_dct,
+            camera_vec, shadow_src, laps, skidmark_col, rocket_path,
+            turbo_path, rotate_all_path, mine_path, bonus_model, bonus_suff,
+            a_i, ingame_menu, share_urls, respawn_name, pitstop_name, wall_name,
+            goal_name, bonus_name, roads_names, grid, start_wp, ai_debug):
         self.season_props = season_props
         self.keys = keys
         self.joystick = joystick

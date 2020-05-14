@@ -1,9 +1,9 @@
+from panda3d.core import TextNode
 from direct.gui.OnscreenImage import OnscreenImage
 from direct.gui.OnscreenText import OnscreenText
 from yyagl.gameobject import GuiColleague
 from yyagl.engine.gui.imgbtn import ImgBtn
 from yracing.player.player import Player
-from panda3d.core import TextNode
 
 
 class TuningGui(GuiColleague):
@@ -34,9 +34,11 @@ class TuningGui(GuiColleague):
         self.buttons += [ImgBtn(
             pos=(1.2, .1), img=self.sprops.tuning_imgs[2],
             extra_args=['suspensions'], **bprops)]
-        #tuning = self.mediator.car2tuning[self.sprops.player_car_name]
-        player_car_name = [player.car for player in players if player.kind == Player.human][0]
-        tuning = [player.tuning for player in players if player.car == player_car_name][0]
+        # tuning = self.mediator.car2tuning[self.sprops.player_car_name]
+        player_car_name = [player.car for player in players
+                           if player.kind == Player.human][0]
+        tuning = [player.tuning for player in players
+                  if player.car == player_car_name][0]
         self.upg1_txt = OnscreenText(
             text=_('current upgrades: +') + str(tuning.engine),
             scale=.06,

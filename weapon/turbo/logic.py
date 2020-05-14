@@ -1,5 +1,4 @@
 from math import pi
-from yyagl.engine.vec import Vec
 from yracing.weapon.weapon.logic import WeaponLogic, WeaponLogicNetwork
 
 

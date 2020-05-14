@@ -1,13 +1,13 @@
 from panda3d.bullet import BulletRigidBodyNode
 from panda3d.core import Mat4, BitMask32
 from yyagl.gameobject import PhysColleague
-from yracing.bitmasks import BitMasks
 from yyagl.engine.vec import Vec
+from yracing.bitmasks import BitMasks
 
 
 class WeaponPhys(PhysColleague):
 
-    def __init__(self, mediator, car, cars, players):
+    def __init__(self, mediator, car, cars, players):  # unused players
         PhysColleague.__init__(self, mediator)
         self.parent, self.car, self.cars = car.gfx.nodepath, car, cars
         self.n_p = self.node = None

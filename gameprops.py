@@ -1,4 +1,4 @@
-class GameProps(object):
+class GameProps:
 
     def __init__(
             self, menu_props, cars_names, drivers, season_tracks,

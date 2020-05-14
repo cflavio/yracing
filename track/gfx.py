@@ -6,9 +6,9 @@ from panda3d.core import NodePath, LPoint3f, LineSegs, BitMask32
 from direct.gui.OnscreenText import OnscreenText
 from yyagl.engine.gfx import AnimNode, AmbientLight, Spotlight
 from yyagl.gameobject import GfxColleague
+from yyagl.lib.p3d.gfx import P3dNode
 from yracing.bitmasks import BitMasks
 from .signs import Signs
-from yyagl.lib.p3d.gfx import P3dNode
 
 
 class TrackGfx(GfxColleague):
@@ -20,11 +20,11 @@ class TrackGfx(GfxColleague):
         self.__flat_roots = {}
         self.raceprops = race_props
         GfxColleague.__init__(self, mediator)
-        #taskMgr.add(self.__set_meshes())
+        # taskMgr.add(self.__set_meshes())
         self.__set_meshes()
         self._set_light()
 
-    #async def __set_meshes(self):
+    # async def __set_meshes(self):
     def __set_meshes(self):
         info('loading track model')
         filename = self.raceprops.gfx_track_path
@@ -32,7 +32,7 @@ class TrackGfx(GfxColleague):
             script_path = executable + ' yyagl/build/process_track.py'
             system(script_path + ' assets/tracks/' + self.raceprops.track_name)
         info('loading ' + filename)
-        #self.model = await loader.load_model(filename, blocking=False)
+        # self.model = await loader.load_model(filename, blocking=False)
         self.model = loader.load_model(filename)
         self.model = P3dNode(self.eng.gfx.gfx_mgr.set_srgb(self.model))
         rpr = self.raceprops

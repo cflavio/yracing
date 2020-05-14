@@ -14,7 +14,9 @@ class Player:
 
     human, ai, network = range(3)
 
-    def __init__(self, driver=None, car=None, kind=None, tuning=None, human_idx=None, name='', points=0):
+    def __init__(
+            self, driver=None, car=None, kind=None, tuning=None,
+            human_idx=None, name='', points=0):
         self.driver = driver
         self.car = car
         self.kind = kind
@@ -25,4 +27,5 @@ class Player:
 
     def __repr__(self):
         return 'player(%s %s %s %s %s %s)' % (
-            self.driver, self.car, self.kind, self.tuning, self.human_idx, self.name)
+            self.driver, self.car, self.kind, self.tuning, self.human_idx,
+            self.name)

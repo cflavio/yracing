@@ -1,5 +1,4 @@
 from yyagl.gameobject import GameObject
-from .logic import DriverLogic
 
 
 class Driver(GameObject):
@@ -14,4 +13,5 @@ class Driver(GameObject):
 
     def __repr__(self):
         return 'driver(%s %s %s %s %s)' % (
-            self.img_idx, self.name, self.speed, self.adherence, self.stability)
+            self.img_idx, self.name, self.speed, self.adherence,
+            self.stability)

@@ -4,7 +4,8 @@ from yyagl.gameobject import GameObject
 
 class Minimap(GameObject):
 
-    def __init__(self, bounds, track_img, handle_img, col_dct, cars, player_car):
+    def __init__(
+            self, bounds, track_img, handle_img, col_dct, cars, player_car):
         GameObject.__init__(self)
         self.bounds = bounds
         self.minimap = OnscreenImage(
@@ -15,7 +16,8 @@ class Minimap(GameObject):
         self.car_handles = {}
         for car_name in sorted(cars, key=lambda car: car == player_car):
             self.__set_car(car_name, player_car, handle_img, col_dct)
-        list(map(lambda car: car.set_transparency(True), self.car_handles.values()))
+        list(map(lambda car: car.set_transparency(True),
+                 self.car_handles.values()))
         self.width = self.minimap.get_scale()[0] * 2.0
         self.height = self.minimap.get_scale()[2] * 2.0
         center_x, center_y = self.minimap.get_x(), self.minimap.get_z()

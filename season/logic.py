@@ -21,18 +21,19 @@ class SeasonLogic(LogicColleague):
     def start(self, reset=True):
         if reset:
             pass
-            #self.ranking.reset()
-            #self.tuning.reset()
+            # self.ranking.reset()
+            # self.tuning.reset()
         self.tuning.attach_obs(self.on_tuning_sel)
 
     def on_tuning_sel(self, val):
-        #tun = self.tuning.car2tuning[self.props.player_car_name]
-        tun = [player.tuning for player in self.players if player.kind == Player.human][0]
+        # tun = self.tuning.car2tuning[self.props.player_car_name]
+        tun = [player.tuning for player in self.players
+               if player.kind == Player.human][0]
         setattr(tun, val, getattr(tun, val) + 1)
-        #val2field = {'engine': 'tuning_engine', 'tires': 'tuning_tires',
-        #             'suspensions': 'tuning_suspensions'}
-        #field = val2field[val]
-        #setattr(self.props, field, getattr(self.props, field) + 1)
+        # val2field = {'engine': 'tuning_engine', 'tires': 'tuning_tires',
+        #              'suspensions': 'tuning_suspensions'}
+        # field = val2field[val]
+        # setattr(self.props, field, getattr(self.props, field) + 1)
         self.next_race()
 
     def load(self, ranking, tuning, drivers):
@@ -49,7 +50,8 @@ class SeasonLogic(LogicColleague):
             idx = self.props.gameprops.season_tracks.index(track)
             next_track = self.props.gameprops.season_tracks[idx + 1]
             self.notify('on_season_cont', next_track,
-                        [player.car for player in self.players if player.kind == Player.human][0], self.players)
+                        [player.car for player in self.players
+                         if player.kind == Player.human][0], self.players)
 
     def create_race_server(self, race_props, players):
         self.race = RaceServer(race_props, players)

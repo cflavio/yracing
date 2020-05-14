@@ -2,10 +2,10 @@ from panda3d.core import TextNode
 from direct.gui.OnscreenText import OnscreenText
 from direct.gui.DirectFrame import DirectFrame
 from yyagl.lib.gui import Btn
-from yracing.ranking.gui import RankingGui
 from yyagl.engine.gui.imgbtn import ImgBtn
 from yyagl.gameobject import GameObject
 from yracing.race.event import NetMsgs
+from yracing.ranking.gui import RankingGui
 
 
 class Results(GameObject):
@@ -13,7 +13,7 @@ class Results(GameObject):
     def __init__(self, rprops):
         GameObject.__init__(self)
         self.__res_txts = []
-        self.__buttons = []
+        self._buttons = []
         self.players = self.result_frm = None
         self.rprops = rprops
         self.font = rprops.season_props.gameprops.menu_props.font
@@ -60,7 +60,7 @@ class Results(GameObject):
         tumblr_url = self.rprops.share_urls[3]
         sites = [('facebook', facebook_url), ('twitter', twitter_url),
                  ('google_plus', plus_url), ('tumblr', tumblr_url)]
-        menu_props= self.rprops.season_props.gameprops.menu_props
+        menu_props = self.rprops.season_props.gameprops.menu_props
         self._buttons += [
             ImgBtn(
                 scale=(.078, .078), pos=(.02 + i*.18, -.79),

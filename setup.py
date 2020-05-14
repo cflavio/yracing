@@ -55,9 +55,10 @@ class PDFCmd(AbsCmd):
         racing_lst = [PDFInfo('python', '.', '*.py', racing_fil)]
         binfo_lst = [
             ('python', '*.py *.pdef'), ('lua', 'config.lua'),
-            ('', '*.rst *.css_t *.conf'), ('html', '*.html'), ('javascript', '*.js')]
-        build_lst = [PDFInfo(binfo[0], 'build', binfo[1], [])
-                     for binfo in binfo_lst]
+            ('', '*.rst *.css_t *.conf'), ('html', '*.html'),
+            ('javascript', '*.js')]
+        #build_lst = [PDFInfo(binfo[0], 'build', binfo[1], [])
+        #             for binfo in binfo_lst]
         pdf_conf = {
             'yracing': racing_lst,
             'yracing_car': [PDFInfo('python', './car', '*.py', [])],

@@ -1,8 +1,8 @@
 from panda3d.core import BitMask32
 from panda3d.bullet import BulletBoxShape, BulletGhostNode
 from yyagl.gameobject import PhysColleague
-from yracing.bitmasks import BitMasks
 from yyagl.engine.vec import Vec
+from yracing.bitmasks import BitMasks
 
 
 class BonusPhys(PhysColleague):
