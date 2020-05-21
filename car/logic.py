@@ -4,30 +4,30 @@ from panda3d.core import deg2Rad, LPoint3f, Mat4, BitMask32, LVector3f
 from direct.showbase.InputStateGlobal import inputState
 from yyagl.gameobject import LogicColleague
 from yyagl.computer_proxy import ComputerProxy, compute_once, once_a_frame
+from yyagl.engine.vec import Vec2, Vec
 from yracing.camera import Camera, FPCamera
 from yracing.player.player import Player
 from yracing.car.event import DirKeys
 from yracing.weapon.rear_rocket.rear_rocket import RearRocket
 from yracing.bitmasks import BitMasks
-from yyagl.engine.vec import Vec2, Vec
 
 
-class WPInfo(object):
+class WPInfo:
 
     def __init__(self, prev, next_):
         self.prev = prev
         self.next = next_
 
 
-class Input2ForcesStrategy(object):
+class Input2ForcesStrategy:
 
     turn_time = .1  # after this time the steering is at its max value
 
-    #@staticmethod
-    #def build(is_player, joystick, car):
-    #    return (DiscreteInput2ForcesStrategy
-    #            if not joystick or not is_player
-    #            else AnalogicInput2ForcesStrategy)(car)
+    # @staticmethod
+    # def build(is_player, joystick, car):
+    #     return (DiscreteInput2ForcesStrategy
+    #             if not joystick or not is_player
+    #             else AnalogicInput2ForcesStrategy)(car)
 
     def __init__(self, is_player, car):
         self.__is_player = is_player
@@ -68,7 +68,8 @@ class Input2ForcesStrategy(object):
         return self.curr_clamp
 
     def get_eng_frc(self, eng_frc, fwd, brk):
-        if self.car.fsm.getCurrentOrNextState() in ['Loading', 'Countdown']: return 0
+        if self.car.fsm.getCurrentOrNextState() in ['Loading', 'Countdown']:
+            return 0
         m_s = self.car.phys.max_speed
         if fwd:
             actual_max_speed = m_s * self.car.phys.curr_speed_mul
@@ -78,14 +79,24 @@ class Input2ForcesStrategy(object):
             eng_frc = eng_frc * (1.05 - self.car.phys.speed / actual_max_speed)
         return eng_frc
 
-    def input2forces(self, car_input, joystick_mgr, is_drifting, player_car_idx, curr_time, acc_key, brk_key, a_i):
+    def input2forces(
+            self, car_input, joystick_mgr, is_drifting, player_car_idx,
+            curr_time, acc_key, brk_key, a_i):
         keys = ['forward', 'rear', 'left', 'right']
         keys = [key + str(player_car_idx) for key in keys]
         joystick = not any(inputState.isSet(key) for key in keys)
-        if a_i or not joystick or not self.__is_player: return self.input2forces_discrete(car_input, joystick_mgr, is_drifting, player_car_idx, curr_time)
-        else: return self.input2forces_analog(car_input, joystick_mgr, is_drifting, player_car_idx, curr_time, acc_key, brk_key)
+        if a_i or not joystick or not self.__is_player:
+            return self.input2forces_discrete(
+                car_input, joystick_mgr, is_drifting, player_car_idx,
+                curr_time)
+        else:
+            return self.input2forces_analog(
+                car_input, joystick_mgr, is_drifting, player_car_idx,
+                curr_time, acc_key, brk_key)
 
-    def input2forces_discrete(self, car_input, joystick_mgr, is_drifting, player_car_idx, curr_time):
+    def input2forces_discrete(self, car_input, joystick_mgr, is_drifting,
+                              player_car_idx, curr_time):
+        # unused joystick_mgr, player_car_idx
         phys = self.car.phys
         eng_frc = brake_frc = 0
         f_t = curr_time
@@ -103,7 +114,8 @@ class Input2ForcesStrategy(object):
             self.brake_start_time = globalClock.getFrameTime()
         self.prev_frame_braking = car_input.rear
         if car_input.rear:
-            brake_frc = brake_frc * (1 + .4 * (globalClock.getFrameTime() - self.brake_start_time))
+            brake_frc = brake_frc * (1 + .4 * (
+                globalClock.getFrameTime() - self.brake_start_time))
         brake_frc = min(brake_frc, 1.4 * phys.brake_frc)
         clamp = self.steering_clamp
         if car_input.left:
@@ -129,10 +141,12 @@ class Input2ForcesStrategy(object):
                 steering_sign = (-1 if self._steering > 0 else 1)
                 self._steering += steering_sign * self.steering_dec
         self.drift.process(car_input)
-        return self.get_eng_frc(eng_frc, car_input.forward, car_input.rear), brake_frc, phys.brake_ratio, \
-            self._steering
+        return self.get_eng_frc(eng_frc, car_input.forward, car_input.rear), \
+            brake_frc, phys.brake_ratio, self._steering
 
-    def input2forces_analog(self, car_input, joystick_mgr, is_drifting, player_car_idx, curr_time, acc_key, brk_key):
+    def input2forces_analog(self, car_input, joystick_mgr, is_drifting,
+                            player_car_idx, curr_time, acc_key, brk_key):
+        #  unused car_input, curr_time
         phys = self.car.phys
         eng_frc = brake_frc = 0
         jstate = joystick_mgr.get_joystick(player_car_idx)
@@ -151,14 +165,15 @@ class Input2ForcesStrategy(object):
             self.brake_start_time = globalClock.getFrameTime()
         self.prev_frame_braking = j_b
         if j_b:
-            brake_frc = brake_frc * (1 + .4 * (globalClock.getFrameTime() - self.brake_start_time))
+            brake_frc = brake_frc * (1 + .4 * (
+                globalClock.getFrameTime() - self.brake_start_time))
         brake_frc = min(brake_frc, 1.4 * phys.brake_frc)
         self._steering = -j_x * self.steering_clamp(is_drifting)
-        return self.get_eng_frc(eng_frc, j_a, j_b), brake_frc, phys.brake_ratio, \
-            self._steering
+        return self.get_eng_frc(eng_frc, j_a, j_b), brake_frc, \
+            phys.brake_ratio, self._steering
 
 
-class DriftingForce(object):
+class DriftingForce:
 
     def __init__(self, car):
         self.car = car
@@ -171,6 +186,7 @@ class DriftingForce(object):
         rot_mat_left = Mat4()
         rot_mat_left.setRotateMat(90, (0, 0, 1))
         car_vec_left = rot_mat_left.xformVec(car_vec._vec)
+        # access to a protected member
 
         rot_mat_drift_left = Mat4()
         deg = 45 if input_dct.forward else 90
@@ -236,9 +252,10 @@ class DriftingForce(object):
                 slip = 1 + car_dot_vel_l * vel_fact * .002
                 whl.setFrictionSlip(whl.getFrictionSlip() * slip)
         if intensity:
-            v = direction * intensity
-            v = Vec(v.x, v.y, v.z)
-            phys.pnode.apply_central_force(v._vec)
+            vec = direction * intensity
+            vec = Vec(vec.x, vec.y, vec.z)
+            phys.pnode.apply_central_force(vec._vec)
+            # access to a protected member
         if intensity_torque:
             phys.pnode.apply_torque((0, 0, intensity_torque))
 
@@ -261,10 +278,14 @@ class CarLogic(LogicColleague, ComputerProxy):
         self.fired_weapons = []
         self.camera = None
         self._grid_wps = self._pitstop_wps = None
-        player_car_names = [player.car for player in players if player.kind == Player.human]
-        joystick = car_props.name == player_car_names[mediator.player_car_idx] and \
-            mediator.player_car_idx < self.eng.joystick_mgr.joystick_lib.num_joysticks
-        self.input_strat = Input2ForcesStrategy(self.__class__ == CarPlayerLogic, self.mediator)
+        #player_car_names = [player.car for player in players
+        #                    if player.kind == Player.human]
+        #joystick = \
+        #    car_props.name == player_car_names[mediator.player_car_idx] and \
+        #    mediator.player_car_idx < \
+        #    self.eng.joystick_mgr.joystick_lib.num_joysticks
+        self.input_strat = Input2ForcesStrategy(
+            self.__class__ == CarPlayerLogic, self.mediator)
         self.start_pos = car_props.pos
         self.start_pos_hpr = car_props.hpr
         self.last_ai_wp = None
@@ -283,28 +304,37 @@ class CarLogic(LogicColleague, ComputerProxy):
         phys = self.mediator.phys
         jmgr = self.eng.joystick_mgr
         player_car_idx = self.mediator.player_car_idx
-        acc_key = '' if player_car_idx == -1 else self.cprops.race_props.joystick['forward' + str(player_car_idx + 1)]
-        brk_key = '' if player_car_idx == -1 else self.cprops.race_props.joystick['rear' + str(player_car_idx + 1)]
+        acc_key = '' if player_car_idx == -1 else \
+            self.cprops.race_props.joystick['forward' + str(player_car_idx + 1)]
+        brk_key = '' if player_car_idx == -1 else \
+            self.cprops.race_props.joystick['rear' + str(player_car_idx + 1)]
         eng_f, brake_f, brake_r, steering = \
             self.input_strat.input2forces(
                 input2forces, jmgr, self.is_drifting,
-                self.mediator.player_car_idx, self.eng.curr_time, acc_key, brk_key,
-                self.cprops.race_props.a_i)
+                self.mediator.player_car_idx, self.eng.curr_time, acc_key,
+                brk_key, self.cprops.race_props.a_i)
         phys.set_forces(eng_f, brake_f, brake_r, steering)
         self.__update_roll_info()
         gfx = self.mediator.gfx
         is_skid = self.is_skidmarking
         (gfx.on_skidmarking if is_skid else gfx.on_no_skidmarking)()
         if is_skid:
-            self.eng.joystick_mgr.joystick_lib.set_vibration(self.mediator.player_car_idx, 'skid')
-        else: self.eng.joystick_mgr.joystick_lib.clear_vibration(self.mediator.player_car_idx, 'skid')
+            self.eng.joystick_mgr.joystick_lib.set_vibration(
+                self.mediator.player_car_idx, 'skid')
+        else:
+            self.eng.joystick_mgr.joystick_lib.clear_vibration(
+                self.mediator.player_car_idx, 'skid')
         if not is_skid:
             if self.mediator.phys.curr_speed_mul < .64:
-                self.eng.joystick_mgr.joystick_lib.set_vibration(self.mediator.player_car_idx, 'offroad')
-            else: self.eng.joystick_mgr.joystick_lib.clear_vibration(self.mediator.player_car_idx, 'offroad')
+                self.eng.joystick_mgr.joystick_lib.set_vibration(
+                    self.mediator.player_car_idx, 'offroad')
+            else:
+                self.eng.joystick_mgr.joystick_lib.clear_vibration(
+                    self.mediator.player_car_idx, 'offroad')
         self.__clamp_orientation()
         self.__adjust_car()
-        if not self.mediator.phys.is_flying: self.last_ground_time = self.eng.curr_time
+        if not self.mediator.phys.is_flying:
+            self.last_ground_time = self.eng.curr_time
 
     def __update_roll_info(self):
         roll = self.mediator.gfx.nodepath.r
@@ -347,8 +377,8 @@ class CarLogic(LogicColleague, ComputerProxy):
 
     def reset_car(self):
         if self.mediator.fsm.getCurrentOrNextState() in ['Off', 'Loading']:
-            h = self.mediator.phys.gnd_height(self.start_pos)
-            self.mediator.gfx.nodepath.set_z(h + 1)
+            height = self.mediator.phys.gnd_height(self.start_pos)
+            self.mediator.gfx.nodepath.set_z(height + 1)
         self.mediator.gfx.nodepath.set_x(self.start_pos[0])
         self.mediator.gfx.nodepath.set_y(self.start_pos[1])
         self.mediator.gfx.nodepath.set_hpr(self.start_pos_hpr)
@@ -361,9 +391,11 @@ class CarLogic(LogicColleague, ComputerProxy):
         rot_mat_left = Mat4()
         rot_mat_left.setRotateMat(90, (0, 0, 1))
         car_vec_left = rot_mat_left.xformVec(car_vec._vec)
+        # access to a protected member
         rot_mat_right = Mat4()
         rot_mat_right.setRotateMat(-90, (0, 0, 1))
         car_vec_right = rot_mat_right.xformVec(car_vec._vec)
+        # access to a protected member
         vel = self.mediator.phys.vehicle.get_chassis().get_linear_velocity()
         vel.normalize()
         car_dot_vel_l = car_vec_left.dot(vel)
@@ -376,10 +408,12 @@ class CarLogic(LogicColleague, ComputerProxy):
         for pwp in reversed(self.collected_wps):
             try:
                 _wp = [__wp for __wp in self.cprops.track_waypoints
-                       if __wp.get_name()[8:] == str(pwp)][0]  # facade wp's name
+                       if __wp.get_name()[8:] == str(pwp)][0]
+                # facade wp's name
             except IndexError:  # new tracks
                 _wp = [__wp for __wp in self.cprops.track_waypoints
-                       if __wp.get_name()[2:] == "{:02d}".format(pwp)][0]  # facade wp's name
+                       if __wp.get_name()[2:] == "{:02d}".format(pwp)][0]
+                # facade wp's name
             if _wp in self.not_fork_wps():
                 return _wp
         if self.not_fork_wps():  # if the track has a goal
@@ -390,7 +424,8 @@ class CarLogic(LogicColleague, ComputerProxy):
         hits = []
         p3d_wp1 = Vec(wp1.pos.x, wp1.pos.y, wp1.pos.z)
         p3d_wp2 = Vec(wp2.pos.x, wp2.pos.y, wp2.pos.z)
-        for hit in CarLogic.eng.phys_mgr.ray_test_all(p3d_wp1, p3d_wp2).get_hits():
+        for hit in CarLogic.eng.phys_mgr.ray_test_all(
+                p3d_wp1, p3d_wp2).get_hits():
             hits += [hit.get_node().get_name()]
         return hits
 
@@ -430,7 +465,8 @@ class CarLogic(LogicColleague, ComputerProxy):
         print('car name', self.mediator.name)
         print('damage', self.mediator.gfx.chassis_np_hi.name,
               curr_chassis.name)
-        print('laps', len(self.mediator.logic.lap_times), self.mediator.laps - 1)
+        print('laps', len(self.mediator.logic.lap_times),
+              self.mediator.laps - 1)
         print('last_ai_wp', self.last_ai_wp)
         print('curr_wp', curr_wp)
         print('closest_wps', closest_wps)
@@ -472,7 +508,7 @@ class CarLogic(LogicColleague, ComputerProxy):
         py = p1.y - p0.y
         pz = p1.z - p0.z
         norm = px * px + py * py + pz * pz
-        u =  ((p.x - p0.x) * px + (p.y - p0.y) * py + (p.z - p0.z) * pz) / norm
+        u = ((p.x - p0.x) * px + (p.y - p0.y) * py + (p.z - p0.z) * pz) / norm
         if u > 1: u = 1
         elif u < 0: u = 0
         _x = p0.x + u * px
@@ -492,22 +528,23 @@ class CarLogic(LogicColleague, ComputerProxy):
                 [wp for wp in w2p if self.last_ai_wp in wp.prevs]
         car_np = self.mediator.gfx.nodepath
         curr_min_dist = 9999
-        for wp in closest_wps:
+        for wayp in closest_wps:
             for other_wp in w2p:
-                if wp in other_wp.prevs:
-                    dist = self.dist_to_segment(car_np.get_pos(), wp.pos, other_wp.pos)
+                if wayp in other_wp.prevs:
+                    dist = self.dist_to_segment(car_np.get_pos(), wayp.pos,
+                                                other_wp.pos)
                     if dist < curr_min_dist:
                         curr_min_dist = dist
-                        curr_min_wp = wp
+                        curr_min_wp = wayp
         return curr_min_wp
 
     def __get_dist(self, _wp):
         car_np = self.mediator.gfx.nodepath
         w2p = self.cprops.track_waypoints
         curr_min_dist = 9999
-        for wp in w2p:
-            if _wp in wp.prevs:
-                dist = self.dist_to_segment(car_np.get_pos(), _wp.pos, wp.pos)
+        for wayp in w2p:
+            if _wp in wayp.prevs:
+                dist = self.dist_to_segment(car_np.get_pos(), _wp.pos, wayp.pos)
                 if dist < curr_min_dist:
                     curr_min_dist = dist
         return curr_min_dist
@@ -522,18 +559,18 @@ class CarLogic(LogicColleague, ComputerProxy):
                 [wp for wp in w2p if self.last_ai_wp in wp.prevs]
         not_last = len(self.mediator.logic.lap_times) < self.mediator.laps - 1
         car_np = self.mediator.gfx.nodepath
-        #distances = [car_np.get_distance(wp.node) for wp in closest_wps]
-        #curr_wp = closest_wps[distances.index(min(distances))]
+        # distances = [car_np.get_distance(wp.node) for wp in closest_wps]
+        # curr_wp = closest_wps[distances.index(min(distances))]
         curr_wp = self.__get_closest_wp()
         self._pitstop_wps = curr_wp.prevs_nogrid
         self._grid_wps = curr_wp.prevs_nopitlane
-        #considered_wps = self._pitstop_wps \
-        #    if self.hi_chassis_name in self.curr_chassis_name and not_last \
-        #    else self._grid_wps
+        # considered_wps = self._pitstop_wps \
+        #     if self.hi_chassis_name in self.curr_chassis_name and not_last \
+        #     else self._grid_wps
         considered_wps = curr_wp.prevs_all
         waypoints = [wp for wp in considered_wps if wp in closest_wps
                      or any(_wp in closest_wps for _wp in wp.prevs)]
-        #distances = [car_np.get_distance(wp.node) for wp in waypoints]
+        # distances = [car_np.get_distance(wp.node) for wp in waypoints]
         distances = [self.__get_dist(wp) for wp in waypoints]
         if not distances:  # there is a bug
             self.__log_wp_info(self.curr_chassis, curr_wp, closest_wps,
@@ -614,8 +651,12 @@ class CarLogic(LogicColleague, ComputerProxy):
         return 4 + 24 * self.mediator.phys.speed_ratio
 
     def update_waypoints(self):
-        try: closest_wp = int(self.closest_wp().prev.get_name()[8:])  # WaypointX
-        except ValueError: closest_wp = int(self.closest_wp().prev.get_name()[2:])  # wpXY (new tracks)
+        try:
+            closest_wp = int(self.closest_wp().prev.get_name()[8:])
+            # WaypointX
+        except ValueError:
+            closest_wp = int(self.closest_wp().prev.get_name()[2:])
+            # wpXY (new tracks)
         # facade: wp.num in Waypoint's class
         if closest_wp not in self.collected_wps:
             self.collected_wps += [closest_wp]
@@ -731,6 +772,7 @@ class CarLogic(LogicColleague, ComputerProxy):
         hspeed = self.mediator.phys.speed > 50.0
         flying = self.mediator.phys.is_flying
         input_dct = self.mediator.event._get_input()
+        # access to a protected member
         return input_dct.rear and hspeed and not flying
 
     @property
@@ -788,8 +830,9 @@ class CarPlayerLogic(CarLogic):
         CarLogic.__init__(self, mediator, car_props, players)
         is_top = car_props.race_props.season_props.camera == 'top'
         camera_cls = Camera if is_top else FPCamera
-        self.camera = camera_cls(mediator.gfx.nodepath,
-                                 car_props.race_props.camera_vec, self.mediator)
+        self.camera = camera_cls(
+            mediator.gfx.nodepath, car_props.race_props.camera_vec,
+            self.mediator)
         self.car_positions = []
         self.last_upd_dist_time = 0
         self.is_moving = True
@@ -810,7 +853,7 @@ class CarPlayerLogic(CarLogic):
         self.is_moving = not all((pos - center).length() < 6
                                  for pos in positions)
 
-    def update(self, input_dct):
+    def update(self, input_dct):  # parameters differ from overridden
         CarLogic.update(self, input_dct)
         if self.mediator.fsm.getCurrentOrNextState() == 'Results': return
         panel = self.mediator.gui.panel

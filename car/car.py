@@ -12,11 +12,12 @@ from .gui import CarGui, CarPlayerGui, CarPlayerLocalMPGui, \
 from .ai import CarAi
 
 
-class CarProps(object):
+class CarProps:
 
     def __init__(
             self, race_props, name, pos, hpr, callback, race, driver_engine,
-            driver_tires, driver_suspensions, track_waypoints, track_skidmark_col, ai_poller):
+            driver_tires, driver_suspensions, track_waypoints,
+            track_skidmark_col, ai_poller):
         self.race_props = race_props
         self.name = name
         self.pos = pos
@@ -54,8 +55,8 @@ class CarFacade:
     @property
     def heading(self): return self.gfx.nodepath.h
 
-    def attach_obs(self, obs_meth, sort=10, rename='', args=[]):
-        return self.event.attach(obs_meth, sort, rename, args)
+    def attach_obs(self, obs_meth, sort=10, rename='', args=None):
+        return self.event.attach(obs_meth, sort, rename, args or [])
 
     def detach_obs(self, obs_meth, lambda_call=None):
         return self.event.detach(obs_meth, lambda_call)
@@ -69,8 +70,12 @@ class CarFacade:
     def get_hpr(self): return self.gfx.nodepath.get_hpr()
     def closest_wp(self): return self.logic.closest_wp()
     def upd_ranking(self, ranking): return self.gui.upd_ranking(ranking)
-    def get_linear_velocity(self): return self.phys.vehicle.get_chassis().get_linear_velocity()
-    def demand(self, tgt_state, *args): return self.fsm.demand(tgt_state, *args)
+
+    def get_linear_velocity(self):
+        return self.phys.vehicle.get_chassis().get_linear_velocity()
+
+    def demand(self, tgt_state, *args):
+        return self.fsm.demand(tgt_state, *args)
 
 
 class Car(GameObject, CarFacade):
@@ -96,11 +101,13 @@ class Car(GameObject, CarFacade):
         self.fsm = self.fsm_cls(self, self._car_props, self._players)
         gfx_task = taskMgr.add(self._build_gfx)
         await gfx_task
-        self.phys = self.phys_cls(self, self._car_props, self._tuning, self._players)
+        self.phys = self.phys_cls(self, self._car_props, self._tuning,
+                                  self._players)
         self.gfx.set_emitters()
         self.logic = self.logic_cls(self, self._car_props, self._players)
         self.gui = self.gui_cls(self, self._car_props, self._players)
-        self.event = self.event_cls(self, self._car_props.race_props, self._players)
+        self.event = self.event_cls(self, self._car_props.race_props,
+                                    self._players)
         self.ai = self.ai_cls(self)
         self.audio = self.audio_cls(self, self._car_props.race_props)
         self._car_props.callback()
@@ -162,11 +169,13 @@ class AiCar(Car):
         self.fsm = self.fsm_cls(self, self._car_props, self._players)
         gfx_task = taskMgr.add(self._build_gfx)
         await gfx_task
-        self.phys = self.phys_cls(self, self._car_props, self._tuning, self._players)
+        self.phys = self.phys_cls(self, self._car_props, self._tuning,
+                                  self._players)
         self.gfx.set_emitters()
         self.logic = self.logic_cls(self, self._car_props, self._players)
         self.gui = self.gui_cls(self)
-        self.event = self.event_cls(self, self._car_props.race_props, self._players)
+        self.event = self.event_cls(self, self._car_props.race_props,
+                                    self._players)
         self.ai = self.ai_cls(self, self._car_props, self._players)
         self.audio = self.audio_cls(self)
         self._car_props.callback()

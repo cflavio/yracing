@@ -4,15 +4,15 @@ from os.path import exists
 from panda3d.bullet import BulletRigidBodyNode
 from panda3d.core import NodePath
 from yyagl.gameobject import GfxColleague, GameObject
-from .skidmark import Skidmark
-from .decorator import Decorator
+from yyagl.lib.p3d.gfx import P3dNode
+from yyagl.engine.vec import Vec
 from yracing.weapon.rocket.rocket import Rocket
 from yracing.weapon.rear_rocket.rear_rocket import RearRocket
 from yracing.weapon.turbo.turbo import Turbo
 from yracing.weapon.rotate_all.rotate_all import RotateAll
 from yracing.weapon.mine.mine import Mine
-from yyagl.lib.p3d.gfx import P3dNode
-from yyagl.engine.vec import Vec
+from .skidmark import Skidmark
+from .decorator import Decorator
 
 
 class CarGfxFacade:
@@ -25,7 +25,7 @@ class CarGfx(GfxColleague, CarGfxFacade):
 
     def __init__(self, mediator, car_props):
         self.chassis_np = self.cnt = self.chassis_np_low = \
-            self.chassis_np_hi = None
+            self.chassis_np_hi = self.lroot = self.rroot = None
         self.cprops = car_props
         self.wheels = {'fl': None, 'fr': None, 'rl': None, 'rr': None}
         self.nodepath = self.eng.attach_node(BulletRigidBodyNode('Vehicle'))
@@ -73,7 +73,7 @@ class CarGfx(GfxColleague, CarGfxFacade):
         with open(fpath) as phys_file:
             chassis.set_z(json_load(phys_file)['center_mass_offset'])
         self.load_wheels(chassis)
-        #self.eng.do_later(.01, self.__set_emitters)
+        # self.eng.do_later(.01, self.__set_emitters)
 
     def set_emitters(self):
         wheels = self.mediator.phys.vehicle.get_wheels()
@@ -102,7 +102,9 @@ class CarGfx(GfxColleague, CarGfxFacade):
         for _ in range(8):
             self.preload_tsk()
             base.graphicsEngine.renderFrame()
-        list(map(lambda mesh: mesh.reparent_to(self.nodepath), self.mediator.phys.ai_meshes))
+        list(map(
+            lambda mesh: mesh.reparent_to(self.nodepath),
+            self.mediator.phys.ai_meshes))
 
     def preload_tsk(self):
         wpn_classes = [Rocket, RearRocket, Turbo, RotateAll, Mine]
@@ -124,10 +126,14 @@ class CarGfx(GfxColleague, CarGfxFacade):
             self.cnt -= 1
         else:
             node = P3dNode(NodePath('temp'))
-            self.eng.particle(node, 'sparkle', (1, 1, 1, .24), part_duration=.01, autodestroy=.01)
-            self.eng.particle(node, 'dust', (.5, .5, .5, .24), pi/2, part_duration=.01, vel=1.2, autodestroy=.01)
-            self.eng.particle(node, 'dust', (.2, .2, .8, .24), pi/3, .6, .0005, vel=3, part_duration=.01, autodestroy=.01)
-            self.eng.particle(node, 'dust', (.9, .7, .2, .6), pi/20, .1, .001, 0, vel=3, part_duration=.01, autodestroy=.01)
+            self.eng.particle(node, 'sparkle', (1, 1, 1, .24),
+                              part_duration=.01, autodestroy=.01)
+            self.eng.particle(node, 'dust', (.5, .5, .5, .24), pi/2,
+                              part_duration=.01, vel=1.2, autodestroy=.01)
+            self.eng.particle(node, 'dust', (.2, .2, .8, .24), pi/3, .6, .0005,
+                              vel=3, part_duration=.01, autodestroy=.01)
+            self.eng.particle(node, 'dust', (.9, .7, .2, .6), pi/20, .1, .001,
+                              0, vel=3, part_duration=.01, autodestroy=.01)
             node.remove_node()
             self.apply_damage(True)
             self.nodepath.optimize()
@@ -150,7 +156,7 @@ class CarGfx(GfxColleague, CarGfxFacade):
         for whl in [self.wheels['fl'], self.wheels['rl']]:
             whl.set_h(180)
             whl.node.flatten_light()
-        #GfxColleague._end_async(self)
+        # GfxColleague._end_async(self)
 
     def crash_sfx(self):
         self.crash_cnt += 1
@@ -158,8 +164,9 @@ class CarGfx(GfxColleague, CarGfxFacade):
                 self.eng.curr_time - self.last_crash_t < 5.0 or \
                 self.crash_cnt < 2:
             return False
-        pos = self.nodepath.get_pos(self.eng.gfx.root) + (0, 1.2, .75)
-        self.eng.particle(self.eng.gfx.root, 'sparkle', (1, 1, 1, .24), part_duration=1.2, autodestroy=.4)
+        # pos = self.nodepath.get_pos(self.eng.gfx.root) + (0, 1.2, .75)
+        self.eng.particle(self.eng.gfx.root, 'sparkle', (1, 1, 1, .24),
+                          part_duration=1.2, autodestroy=.4)
         self.apply_damage()
         level = 0
         curr_chassis = self.nodepath.children[0].get_children()[0]
@@ -234,23 +241,26 @@ class SkidmarkMgr(GameObject):
             self.r_skidmark = Skidmark(fr_pos, radius, heading)
             self.l_skidmark = Skidmark(fl_pos, radius, heading)
             self.skidmarks += [self.l_skidmark, self.r_skidmark]
-            if self.particles: list(map(lambda part: part.destroy(), self.particles))
+            if self.particles:
+                list(map(lambda part: part.destroy(), self.particles))
             col = self.car.logic.cprops.track_skidmark_col()
             self.particles = [
                 self.eng.particle(
-                    self.car.gfx.lroot, 'dust', (col[0], col[1], col[2], .24), pi/2,
-                    rate=.0005, vel=1.2, part_duration=1.6),
+                    self.car.gfx.lroot, 'dust', (col[0], col[1], col[2], .24),
+                    pi/2, rate=.0005, vel=1.2, part_duration=1.6),
                 self.eng.particle(
-                    self.car.gfx.rroot, 'dust', (col[0], col[1], col[2], .24), pi/2,
-                    rate=.0005, vel=1.2, part_duration=1.6)]
+                    self.car.gfx.rroot, 'dust', (col[0], col[1], col[2], .24),
+                    pi/2, rate=.0005, vel=1.2, part_duration=1.6)]
 
     def on_no_skidmarking(self):
-        if self.particles: list(map(lambda part: part.destroy(), self.particles))
+        if self.particles:
+            list(map(lambda part: part.destroy(), self.particles))
         self.particles = None
         self.l_skidmark = self.r_skidmark = None
 
     def destroy(self):
-        if self.particles: list(map(lambda part: part.destroy(), self.particles))
+        if self.particles:
+            list(map(lambda part: part.destroy(), self.particles))
         self.particles = None
         list(map(lambda skd: skd.destroy(), self.skidmarks))
         self.car = self.skidmarks = None

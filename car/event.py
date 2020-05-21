@@ -3,6 +3,8 @@ from itertools import chain
 from panda3d.core import Vec3, Vec2
 from direct.showbase.InputStateGlobal import inputState
 from yyagl.gameobject import EventColleague
+from yyagl.computer_proxy import ComputerProxy, once_a_frame
+from yyagl.engine.vec import Vec
 from yracing.race.event import wpnclasses2id
 from yracing.player.player import Player
 from yracing.weapon.rocket.rocket import Rocket, RocketNetwork
@@ -11,11 +13,9 @@ from yracing.weapon.rear_rocket.rear_rocket import RearRocket, \
 from yracing.weapon.turbo.turbo import Turbo, TurboNetwork
 from yracing.weapon.rotate_all.rotate_all import RotateAll
 from yracing.weapon.mine.mine import Mine, MineNetwork
-from yyagl.computer_proxy import ComputerProxy, once_a_frame
-from yyagl.engine.vec import Vec
 
 
-class PlayerKeys(object):
+class PlayerKeys:
 
     def __init__(self, forward, rear, left, right, fire, respawn):
         self.forward = forward
@@ -26,14 +26,14 @@ class PlayerKeys(object):
         self.respawn = respawn
 
 
-class Keys(object):
+class Keys:
 
     def __init__(self, players_keys, pause):
         self.players_keys = players_keys
         self.pause = pause
 
 
-class DirKeys(object):
+class DirKeys:
 
     def __init__(self, forward, rear, left, right):
         self.forward = forward
@@ -46,34 +46,40 @@ class DirKeys(object):
             self.forward, self.rear, self.left, self.right)
 
 
-class InputBuilder(object):
+class InputBuilder:
 
     @staticmethod
-    def create(state, joystick):
+    def create(state, joystick):  # unused joystick
         if state in ['Waiting', 'Results']:
-            return InputBuilderAi()
+            inp_bld = InputBuilderAi()
         else:
-            return InputBuilderPlayer()
+            inp_bld = InputBuilderPlayer()
+        return inp_bld
 
 
 class InputBuilderAi(InputBuilder):
 
-    def build(self, ai, joystick_mgr, player_car_idx, car_evt):
+    @staticmethod
+    def build(ai, joystick_mgr, player_car_idx, car_evt):
+        # unused joystick_mgr, player_car_idx, car_evt
         return ai.get_input()
 
 
 class InputBuilderPlayer(InputBuilder):
 
-    def build(self, ai, joystick_mgr, player_car_idx, car_evt, fire_key, respawn_key):
+    @staticmethod
+    def build(ai, joystick_mgr, player_car_idx, car_evt, fire_key,
+              respawn_key):
+        # unused car_evt, fire_key, respawn_key
         keys = ['forward', 'rear', 'left', 'right']
         keys = [key + str(player_car_idx) for key in keys]
         if any(inputState.isSet(key) for key in keys):
             return DirKeys(*[inputState.isSet(key) for key in keys])
         jstate = joystick_mgr.get_joystick(player_car_idx)
-        #j_bx = joystick_mgr.get_joystick_val(player_car_idx, fire_key)
-        #j_by = joystick_mgr.get_joystick_val(player_car_idx, respawn_key)
-        #if j_bx and car_evt.mediator.logic.weapon: car_evt.on_fire()
-        #if j_by: car_evt.process_respawn()
+        # j_bx = joystick_mgr.get_joystick_val(player_car_idx, fire_key)
+        # j_by = joystick_mgr.get_joystick_val(player_car_idx, respawn_key)
+        # if j_bx and car_evt.mediator.logic.weapon: car_evt.on_fire()
+        # if j_by: car_evt.process_respawn()
         inp = {'forward': jstate.b0, 'rear': jstate.b1,
                'left': jstate.x < -.4, 'right': jstate.x > .4}
         keys = ['forward', 'rear', 'left', 'right']
@@ -185,8 +191,8 @@ class CarEvent(EventColleague, ComputerProxy):
         last_wp = self.mediator.logic.last_wp
         start_wp_n, end_wp_n = last_wp.prev, last_wp.next
         spos = start_wp_n.pos
-        h = self.mediator.phys.gnd_height(start_wp_n.pos)
-        spos = Vec(spos.x, spos.y, h + 2)
+        height = self.mediator.phys.gnd_height(start_wp_n.pos)
+        spos = Vec(spos.x, spos.y, height + 2)
         self.mediator.gfx.nodepath.set_pos(spos)
         endpos = end_wp_n.node.get_pos(start_wp_n.node)
         wp_vec = Vec(endpos.x, endpos.y, 0).normalize()
@@ -237,23 +243,31 @@ class CarPlayerEvent(CarEvent):
             ('forward' + suff, keys.forward), ('left' + suff, keys.left),
             ('rear' + suff, keys.rear), ('right' + suff, keys.right)]
         watch = inputState.watchWithModifiers
-        self.toks = list(map(lambda args: watch(args[0], self.eng.lib.remap_code(args[1])), self.label_events))  # arg = (lab, evt)
+        self.toks = list(map(
+            lambda args: watch(args[0], self.eng.lib.remap_code(args[1])),
+            self.label_events))  # arg = (lab, evt)
         if not self.eng.is_runtime:
             self.accept('f11', self.mediator.gui.pars.toggle)
             self.accept('f2', self.eng.gfx.gfx_mgr.screenshot)
             suff = str(8 + mediator.player_car_idx)
             self.accept('f' + suff, self._process_end_goal)
         state = self.mediator.fsm.getCurrentOrNextState()
-        player_car_names = [player.car for player in self._players if player.kind == Player.human]
-        joystick = self.mediator._car_props.name == player_car_names[mediator.player_car_idx] and \
-            mediator.player_car_idx < self.eng.joystick_mgr.joystick_lib.num_joysticks
+        player_car_names = [player.car for player in self._players
+                            if player.kind == Player.human]
+        joystick = \
+            self.mediator._car_props.name == \
+                player_car_names[mediator.player_car_idx] and \
+            mediator.player_car_idx < \
+                self.eng.joystick_mgr.joystick_lib.num_joysticks
+        # access to a protected member
         self.input_bld = InputBuilder.create(state, joystick)
         keys = self.props.keys.players_keys[mediator.player_car_idx]
         self.accept(self.eng.lib.remap_str(keys.respawn), self.process_respawn)
-        evtrespawn = self.props.joystick['respawn' + str(mediator.player_car_idx + 1)]
+        evtrespawn = self.props.joystick['respawn' + \
+            str(mediator.player_car_idx + 1)]
         evtrespawn = 'joypad' + str(mediator.player_car_idx) + '_' + evtrespawn
         self.accept(evtrespawn, self.process_respawn)
-        #self.eng.do_later(5, lambda: self.on_bonus(Turbo) and None)
+        # self.eng.do_later(5, lambda: self.on_bonus(Turbo) and None)
 
     def on_frame(self):
         CarEvent.on_frame(self)
@@ -283,7 +297,8 @@ class CarPlayerEvent(CarEvent):
             if obj != tgt_obj.get_python_tag('car').phys.pnode:
                 self.mediator.audio.rocket_hit_sfx.play()
         if any(wpnname in obj_name for wpnname in ['Rocket', 'Mine']):
-            self.eng.joystick_mgr.joystick_lib.set_vibration(self.mediator.player_car_idx, 'crash', .8)
+            self.eng.joystick_mgr.joystick_lib.set_vibration(
+                self.mediator.player_car_idx, 'crash', .8)
 
     def on_bonus(self, cls=None, wpn_id=None):
         if self.mediator.logic.weapon: self.mediator.gui.panel.unset_weapon()
@@ -295,7 +310,8 @@ class CarPlayerEvent(CarEvent):
         if not cls: return  # if removing
         keys = self.props.keys.players_keys[self.mediator.player_car_idx]
         self.accept(self.eng.lib.remap_str(keys.fire), self.on_fire)
-        evtfire = self.props.joystick['fire' + str(self.mediator.player_car_idx + 1)]
+        evtfire = self.props.joystick[
+            'fire' + str(self.mediator.player_car_idx + 1)]
         evtfire = 'joypad' + str(self.mediator.player_car_idx) + '_' + evtfire
         self.accept(evtfire, self.on_fire)
         if self.mediator.fsm.getCurrentOrNextState() != 'Waiting':
@@ -305,8 +321,9 @@ class CarPlayerEvent(CarEvent):
 
     def on_fire(self):
         keys = self.props.keys.players_keys[self.mediator.player_car_idx]
-        #self.ignore(keys.fire)
-        evtfire = self.props.joystick['fire' + str(self.mediator.player_car_idx + 1)]
+        # self.ignore(keys.fire)
+        evtfire = self.props.joystick[
+            'fire' + str(self.mediator.player_car_idx + 1)]
         evtfire = 'joypad' + str(self.mediator.player_car_idx) + '_' + evtfire
         self.ignore(evtfire)
         self.mediator.logic.fire()
@@ -316,7 +333,8 @@ class CarPlayerEvent(CarEvent):
     def _process_wall(self):
         CarEvent._process_wall(self)
         self.mediator.audio.crash_sfx.play()
-        self.eng.joystick_mgr.joystick_lib.set_vibration(self.mediator.player_car_idx, 'crash', .5)
+        self.eng.joystick_mgr.joystick_lib.set_vibration(
+            self.mediator.player_car_idx, 'crash', .5)
 
     def _process_nonstart_goals(self, lap_number, laps):
         CarEvent._process_nonstart_goals(self, lap_number, laps)
@@ -345,8 +363,9 @@ class CarPlayerEvent(CarEvent):
         joystick_mgr = self.eng.joystick_mgr
         fire_key = self.props.joystick['fire' + str(player_car_idx + 1)]
         respawn_key = self.props.joystick['respawn' + str(player_car_idx + 1)]
-        return self.input_bld.build(self.mediator.ai, joystick_mgr,
-                                    player_car_idx, self, fire_key, respawn_key)
+        return self.input_bld.build(
+            self.mediator.ai, joystick_mgr, player_car_idx, self, fire_key,
+            respawn_key)
 
     def destroy(self):
         keys = self.props.keys.players_keys[self.mediator.player_car_idx]
@@ -427,7 +446,7 @@ class CarNetworkEvent(CarEvent):
     def _get_input(self):
         return self.mediator.logic.curr_network_input
 
-    def on_bonus(self, wpn_cls=None):
+    def on_bonus(self, wpn_cls=None):  # parameters differ from overridden
         pass
 
     def set_fired_weapon(self):
@@ -437,13 +456,13 @@ class CarNetworkEvent(CarEvent):
         self.mediator.logic.unset_fired_weapon(wpn)
 
     def set_weapon(self, wpn_cls, wpn_id):
-        #if wpn_code:
-        #    wpncode2cls = {
-        #        'rocket': Rocket, 'rearrocket': RearRocket, 'turbo': Turbo,
-        #        'rotateall': RotateAll, 'mine': Mine}
-        #    wpn_cls = wpncode2cls[wpn_code]
-        #else:
-        #    wpn_cls = None
+        # if wpn_code:
+        #     wpncode2cls = {
+        #         'rocket': Rocket, 'rearrocket': RearRocket, 'turbo': Turbo,
+        #         'rotateall': RotateAll, 'mine': Mine}
+        #     wpn_cls = wpncode2cls[wpn_code]
+        # else:
+        #     wpn_cls = None
         CarEvent.on_bonus(self, wpn_cls, wpn_id)
 
     def unset_weapon(self):
