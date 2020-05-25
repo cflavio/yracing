@@ -1,5 +1,5 @@
-import simplepbr
 from logging import info
+import simplepbr
 from yyagl.gameobject import FsmColleague
 from yracing.race.logic import NetMsgs
 from yracing.race.gui.countdown import Countdown
@@ -14,6 +14,7 @@ class RaceFsm(FsmColleague):
         self.pbr = pbr
         self.menu_props = None
         self.countdown_sfx = None
+        self.sprops = None
         FsmColleague.__init__(self, mediator)
         self.defaultTransitions = {
             'Loading': ['Countdown'],
@@ -24,8 +25,10 @@ class RaceFsm(FsmColleague):
         info('entering Loading state')
         self.menu_props = rprops.season_props.gameprops.menu_props
         self.countdown_sfx = rprops.season_props.countdown_sfx
-        self.mediator.gui.loading.enter_loading(rprops, track_name_transl, ranking, players)
-        player_car_names = [player.car for player in players if player.kind == Player.human]
+        self.mediator.gui.loading.enter_loading(
+            rprops, track_name_transl, ranking, players)
+        player_car_names = [player.car for player in players
+                            if player.kind == Player.human]
         player_car_name = player_car_names[0]
         args = [player_car_name, player_car_names, players]
         self.eng.do_later(1.0, self.mediator.logic.load_stuff, args)
@@ -35,7 +38,8 @@ class RaceFsm(FsmColleague):
         self.mediator.gui.loading.exit_loading()
         self.mediator.event.notify('on_race_loaded')
         # eng.set_cam_pos((0, 0, 0))
-        if not all(self.mediator.logic.player_cars): return  # we've closed the window
+        if not all(self.mediator.logic.player_cars):
+            return  # we've closed the window
         for player_car in self.mediator.logic.player_cars:
             player_car.attach_obs(self.mediator.event.on_end_race)
 
@@ -93,7 +97,8 @@ class RaceFsm(FsmColleague):
 
     def enterResults(self, race_ranking, players):
         self.mediator.gui.results.show(
-            race_ranking, self.mediator.logic.player_cars[0].lap_times, players)
+            race_ranking, self.mediator.logic.player_cars[0].lap_times,
+            players)
         cars = self.mediator.logic.player_cars + self.mediator.logic.cars
         list(map(lambda car: car.demand('Results'), cars))
 
@@ -105,8 +110,8 @@ class RaceFsm(FsmColleague):
 
 class RaceFsmServer(RaceFsm):
 
-    def __init__(self, mediator, shaders):
-        RaceFsm.__init__(self, mediator, shaders)
+    def __init__(self, mediator, shaders, pbr):
+        RaceFsm.__init__(self, mediator, shaders, pbr)
         self._countdown_ready = False
         self.countdown_clients = []
         self.eval_tsk = self.eng.add_task(self.eval_start)
@@ -117,18 +122,20 @@ class RaceFsmServer(RaceFsm):
 
     def eval_start(self, task):
         connections = [conn for conn in self.eng.server.connections]
-        if all(client in self.countdown_clients for client in connections) and self._countdown_ready:
+        if all(client in self.countdown_clients for client in connections) \
+                and self._countdown_ready:
             self.eng.server.send([NetMsgs.start_countdown])
             self.eval_tsk = self.eng.remove_task(self.eval_tsk)
-            self.aux_launch_tsk = self.eng.do_later(.5, self.server_start_countdown)
+            self.aux_launch_tsk = self.eng.do_later(
+                .5, self.server_start_countdown)
             self.mediator.event.network_register()
         return task.cont
 
 
 class RaceFsmClient(RaceFsm):
 
-    def __init__(self, mediator, shaders):
-        RaceFsm.__init__(self, mediator, shaders)
+    def __init__(self, mediator, shaders, pbr):
+        RaceFsm.__init__(self, mediator, shaders, pbr)
 
     def start_countdown(self): pass
 
