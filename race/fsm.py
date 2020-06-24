@@ -1,5 +1,5 @@
 from logging import info
-import simplepbr
+# import simplepbr
 from yyagl.gameobject import FsmColleague
 from yracing.race.logic import NetMsgs
 from yracing.race.gui.countdown import Countdown
@@ -51,7 +51,7 @@ class RaceFsm(FsmColleague):
         self.mediator.logic.enter_play()
         if self.shaders:
             self.eng.shader_mgr.toggle_shader()
-        if self.pbr: simplepbr.init()
+        # if self.pbr: simplepbr.init()
         cars = self.mediator.logic.player_cars + self.mediator.logic.cars
         list(map(lambda car: car.reset_car(), cars))
         list(map(lambda car: car.demand('Countdown'), cars))
