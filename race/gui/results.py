@@ -56,10 +56,12 @@ class Results(GameObject):
         facebook_url = self.rprops.share_urls[0]
         twitter_url = self.rprops.share_urls[1]
         twitter_url = twitter_url.format(time=round(min_time, 2), track=track)
-        plus_url = self.rprops.share_urls[2]
-        tumblr_url = self.rprops.share_urls[3]
-        sites = [('facebook', facebook_url), ('twitter', twitter_url),
-                 ('google_plus', plus_url), ('tumblr', tumblr_url)]
+        # plus_url = self.rprops.share_urls[2]
+        # tumblr_url = self.rprops.share_urls[3]
+        sites = [
+            ('facebook', facebook_url),
+            ('twitter', twitter_url)]
+            # ('google_plus', plus_url), ('tumblr', tumblr_url)
         menu_props = self.rprops.season_props.gameprops.menu_props
         self._buttons += [
             ImgBtn(

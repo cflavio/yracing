@@ -8,7 +8,9 @@ class RankingFacade:
 
     # [('carname2points', lambda obj: obj.logic.carname2points)]
     # ('load', lambda obj: obj.logic.load),
-    def show(self): return self.gui.show()
+    def show(self, rprops, sprops, ranking, players):
+        return self.gui.show(rprops, sprops, ranking, players)
+
     def hide(self): return self.gui.hide()
     def reset(self): return self.logic.reset()
     def attach_obs(self, obs_meth, sort=10, rename='', args=None):
