@@ -14,9 +14,9 @@ class RankingFacade:
     def hide(self): return self.gui.hide()
     def reset(self): return self.logic.reset()
     def attach_obs(self, obs_meth, sort=10, rename='', args=None):
-        return self.gui.attach(obs_meth, sort, rename, args or [])
+        return self.gui.attach_obs(obs_meth)
     def detach_obs(self, obs_meth, lambda_call=None):
-        return self.gui.detach(obs_meth, lambda_call)
+        return self.gui.detach_obs(obs_meth)
 
 
 class Ranking(GameObject, RankingFacade):

@@ -74,10 +74,10 @@ class RankingPage(Page):
         # Page's __init__ is not invoked
 
     def attach_obs(self, mth):  # parameters differ from overridden
-        self.gui.attach_obs(mth)
+        self.gui.attach(mth)
 
     def detach_obs(self, mth):  # parameters differ from overridden
-        self.gui.detach_obs(mth)
+        self.gui.detach(mth)
 
     def destroy(self):
         self.event.destroy()
@@ -91,22 +91,30 @@ class RankingMenuGui(GuiColleague):
         GuiColleague.__init__(self, mediator)
         menu_props = sprops.gameprops.menu_props
         menu_props.btn_size = (-8.6, 8.6, -.42, .98)
-        self.menu = Menu(menu_props)
+        #self.menu = RankingMenu(rprops, sprops, ranking, players)
         self.rank_page = RankingPage(
             rprops, sprops, menu_props, ranking, players)
-        self.eng.do_later(.01, self.menu.push_page, [self.rank_page])
+        self.eng.do_later(.01, self.mediator.push_page, [self.rank_page])
 
     def destroy(self):
-        self.menu = self.menu.destroy()
+        self.rank_page.destroy()
         GuiColleague.destroy(self)
 
 
-class RankingMenu(GameObject):
+class RankingMenu(Menu):
     gui_cls = RankingMenuGui
 
     def __init__(self, rprops, sprops, ranking, players):
-        GameObject.__init__(self)
-        self.gui = self.gui_cls(self, rprops, sprops, ranking, players)
+        self.__rprops = rprops
+        self.__sprops = sprops
+        self.__ranking = ranking
+        self.__players = players
+        menu_props = sprops.gameprops.menu_props
+        Menu.__init__(self, menu_props)
+
+    def _build_gui(self):
+        self.gui = self.gui_cls(self, self.__rprops, self.__sprops,
+                                self.__ranking, self.__players)
 
     def attach_obs(self, mth):
         self.gui.rank_page.attach_obs(mth)

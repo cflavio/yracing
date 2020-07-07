@@ -12,7 +12,7 @@ class TuningFacade:
     def detach_obs(self, obs_meth, lambda_call=None):
         return self.gui.detach(obs_meth, lambda_call)
     # ('load', lambda obj: obj.logic.load),
-    def show_gui(self): return self.gui.show()
+    def show_gui(self, players): return self.gui.show(players)
     def hide_gui(self): return self.gui.hide()
 
 
