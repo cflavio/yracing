@@ -1,5 +1,6 @@
 from logging import info
 from panda3d.core import TextureStage
+from direct.gui.OnscreenImage import OnscreenImage
 from yyagl.lib.gui import Btn, Text, Img
 from yyagl.lib.p3d.shader import load_shader
 from yyagl.gameobject import GuiColleague
@@ -182,9 +183,14 @@ class RankingGui(GuiColleague):
         return txt, img
 
     def show(self, rprops, sprops, ranking, players):
+        self.background = OnscreenImage(
+            sprops.gameprops.menu_props.background_img_path,
+            scale=(1.77778, 1, 1))
+        self.background.setBin('background', 10)
         self.rank_menu = RankingMenu(rprops, sprops, ranking, players)
 
     def hide(self):
+        self.background.destroy()
         self.rank_menu.destroy()
 
     def attach_obs(self, mth):
