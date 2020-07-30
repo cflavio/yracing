@@ -109,11 +109,14 @@ class Car(GameObject, CarFacade):
         self.event = self.event_cls(self, self._car_props.race_props,
                                     self._players)
         self.ai = self.ai_cls(self)
-        self.audio = self.audio_cls(self, self._car_props.race_props)
+        self._build_audio()
         self._car_props.callback()
 
     def _build_gfx(self, task):
         self.gfx = self.gfx_cls(self, self._car_props)
+
+    def _build_audio(self):
+        self.audio = self.audio_cls(self)
 
     def destroy(self):
         self.fsm.destroy()
@@ -126,8 +129,13 @@ class Car(GameObject, CarFacade):
         self.audio.destroy()
         GameObject.destroy(self)
 
+class CarPlayerAbs(Car):
 
-class CarPlayer(Car):
+    def _build_audio(self):
+        self.audio = self.audio_cls(self, self._car_props.race_props)
+
+
+class CarPlayer(CarPlayerAbs):
     event_cls = CarPlayerEvent
     audio_cls = CarPlayerAudio
     gui_cls = CarPlayerGui
@@ -137,14 +145,14 @@ class CarPlayer(Car):
     fsm_cls = CarPlayerFsm
 
 
-class CarPlayerServer(Car):
+class CarPlayerServer(CarPlayerAbs):
     event_cls = CarPlayerEventServer
     audio_cls = CarPlayerAudio
     gui_cls = CarPlayerMPGui
     logic_cls = CarPlayerLogic
 
 
-class CarPlayerClient(Car):
+class CarPlayerClient(CarPlayerAbs):
     event_cls = CarPlayerEventClient
     audio_cls = CarPlayerAudio
     gui_cls = CarPlayerMPGui
