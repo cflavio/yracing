@@ -80,7 +80,7 @@ class RaceEvent(EventColleague):
 
     def __init__(self, mediator, menu_cls, keys, players):
         EventColleague.__init__(self, mediator)
-        self.__players = players
+        self._players = players
         self.menu_cls = menu_cls
         self.ended_cars = []
         self.__keys = keys
@@ -123,7 +123,7 @@ class RaceEvent(EventColleague):
 
     def on_end_race(self, player_name):
         self.ended_cars += [player_name]
-        player_car_names = [player.car for player in self.__players
+        player_car_names = [player.car for player in self._players
                             if player.kind == Player.human]
         if not all(pcar in self.ended_cars
                    for pcar in player_car_names): return
@@ -131,7 +131,7 @@ class RaceEvent(EventColleague):
         zipped = zip(self.mediator.logic.race_ranking(), points)
         race_ranking = {car: point for car, point in zipped}
         if self.mediator.fsm.getCurrentOrNextState() != 'Results':
-            self.mediator.fsm.demand('Results', race_ranking, self.__players)
+            self.mediator.fsm.demand('Results', race_ranking, self._players)
 
     def _move_car(self, car):
         if not hasattr(car, 'logic'): return  # it's created in the 2nd frame
@@ -378,7 +378,7 @@ class RaceEventServer(RaceEvent):
         zipped = zip(self.mediator.logic.race_ranking(), points)
         race_ranking = {car: point for car, point in zipped}
         if self.mediator.fsm.getCurrentOrNextState() != 'Results':
-            self.mediator.fsm.demand('Results', race_ranking, self.__players)
+            self.mediator.fsm.demand('Results', race_ranking, self._players)
 
     def on_end_race_player(self, uid):
         self.players_ended += [uid]
@@ -528,7 +528,7 @@ class RaceEventClient(RaceEvent):
             points = [10, 8, 6, 4, 3, 2, 1, 0]
             zipped = zip(self.mediator.logic.race_ranking(), points)
             race_ranking = {car: point for car, point in zipped}
-            self.mediator.fsm.demand('Results', race_ranking, self.__players)
+            self.mediator.fsm.demand('Results', race_ranking, self._players)
 
     def destroy(self):
         self.eng.client.detach(self.on_game_packet)
