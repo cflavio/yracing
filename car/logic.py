@@ -81,7 +81,9 @@ class Input2ForcesStrategy:
 
     def input2forces(
             self, car_input, joystick_mgr, is_drifting, player_car_idx,
-            curr_time, acc_key, brk_key, a_i):
+            curr_time,
+            #acc_key, brk_key,
+            a_i):
         keys = ['forward', 'rear', 'left', 'right']
         keys = [key + str(player_car_idx) for key in keys]
         joystick = not any(inputState.isSet(key) for key in keys)
@@ -92,7 +94,9 @@ class Input2ForcesStrategy:
         else:
             return self.input2forces_analog(
                 car_input, joystick_mgr, is_drifting, player_car_idx,
-                curr_time, acc_key, brk_key)
+                curr_time,
+                #acc_key, brk_key
+            )
 
     def input2forces_discrete(self, car_input, joystick_mgr, is_drifting,
                               player_car_idx, curr_time):
@@ -145,13 +149,15 @@ class Input2ForcesStrategy:
             brake_frc, phys.brake_ratio, self._steering
 
     def input2forces_analog(self, car_input, joystick_mgr, is_drifting,
-                            player_car_idx, curr_time, acc_key, brk_key):
-        #  unused car_input, curr_time
+                            player_car_idx, curr_time
+                            #, acc_key, brk_key
+    ):
+        #  unused curr_time
         phys = self.car.phys
         eng_frc = brake_frc = 0
         jstate = joystick_mgr.get_joystick(player_car_idx)
-        j_a = joystick_mgr.get_joystick_val(player_car_idx, acc_key)
-        j_b = joystick_mgr.get_joystick_val(player_car_idx, brk_key)
+        j_a = car_input.forward  # joystick_mgr.get_joystick_val(player_car_idx, acc_key)
+        j_b = car_input.rear  # joystick_mgr.get_joystick_val(player_car_idx, brk_key)
         scale = lambda val: min(1, max(-1, val * 1.2))
         j_x, j_y = scale(jstate.x), scale(jstate.y)
         if j_a:
@@ -304,15 +310,16 @@ class CarLogic(LogicColleague, ComputerProxy):
         phys = self.mediator.phys
         jmgr = self.eng.joystick_mgr
         player_car_idx = self.mediator.player_car_idx
-        acc_key = '' if player_car_idx == -1 else \
-            self.cprops.race_props.joystick['forward' + str(player_car_idx + 1)]
-        brk_key = '' if player_car_idx == -1 else \
-            self.cprops.race_props.joystick['rear' + str(player_car_idx + 1)]
+        #acc_key = '' if player_car_idx == -1 else \
+        #    self.cprops.race_props.joystick['forward' + str(player_car_idx + 1)]
+        #brk_key = '' if player_car_idx == -1 else \
+        #    self.cprops.race_props.joystick['rear' + str(player_car_idx + 1)]
         eng_f, brake_f, brake_r, steering = \
             self.input_strat.input2forces(
                 input2forces, jmgr, self.is_drifting,
-                self.mediator.player_car_idx, self.eng.curr_time, acc_key,
-                brk_key, self.cprops.race_props.a_i)
+                self.mediator.player_car_idx, self.eng.curr_time,
+                #acc_key, brk_key,
+                self.cprops.race_props.a_i)
         phys.set_forces(eng_f, brake_f, brake_r, steering)
         self.__update_roll_info()
         gfx = self.mediator.gfx

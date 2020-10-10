@@ -72,7 +72,6 @@ def __id2carname():
         id2car[sorting] = car
     return id2car
 
-
 id2carname = __id2carname()
 
 
@@ -120,6 +119,19 @@ class RaceEvent(EventColleague):
 
     def register_menu(self):
         self.accept('escape-up', self.fire_ingame_menu)
+        for i in range(min(self.eng.joystick_mgr.joystick_lib.num_joysticks, len(self.mediator.logic.player_cars))):
+            evtmenu = self.mediator.logic.props.joystick[
+                'menu' + str(i + 1)]
+            evtmenu = 'joypad' + str(i) + '-' + evtmenu + '-up'
+            self.accept(evtmenu, self.fire_ingame_menu)
+        for i in range(min(self.eng.joystick_mgr.joystick_lib.num_joysticks, len(self.mediator.logic.player_cars))):
+            evtpause = self.mediator.logic.props.joystick[
+                'pause' + str(i + 1)]
+            evtpause = 'joypad' + str(i) + '-' + evtpause + '-up'
+            self.accept(evtpause, self._on_pause)
+
+    def _on_pause(self):
+        self.eng.do_later(.01, self.eng.toggle_pause)
 
     def on_end_race(self, player_name):
         self.ended_cars += [player_name]
@@ -162,6 +174,14 @@ class RaceEvent(EventColleague):
             node.look_at(node.get_pos() + interp_vec)
 
     def destroy(self):
+        for i in range(min(self.eng.joystick_mgr.joystick_lib.num_joysticks, len(self.mediator.logic.player_cars))):
+            evtpause = self.mediator.logic.props.joystick[
+                'pause' + str(i + 1)]
+            evtpause = 'joypad' + str(i) + '-' + evtpause + '-up'
+            evtmenu = self.mediator.logic.props.joystick[
+                'menu' + str(i + 1)]
+            evtmenu = 'joypad' + str(i) + '-' + evtmenu + '-up'
+            list(map(self.ignore, [evtpause, evtmenu]))
         list(map(self.ignore, ['escape-up', self.__keys.pause]))
         EventColleague.destroy(self)
 
@@ -420,7 +440,10 @@ class RaceEventClient(RaceEvent):
 
     def on_server_quit(self):
         if self.ingame_menu: self.on_ingame_back()
-        self.ignore('escape-up')
+        evtmenu = self.props.joystick[
+            'menu' + str(self.mediator.player_car_idx + 1)]
+        evtmenu = 'joypad' + str(self.mediator.player_car_idx) + '-' + evtmenu + '-up'
+        list(map(self.ignore, ['escape-up', evtmenu]))
 
     def on_game_packet(self, data_lst):
         from yracing.car.car import NetworkCar
