@@ -1,3 +1,4 @@
+from logging import info
 from random import choice
 from yyagl.engine.vec import Vec
 from yyagl.gameobject import EventColleague
@@ -21,7 +22,11 @@ class WeaponEvent(EventColleague):
         self.mediator.destroy()
 
     def destroy(self):
-        self.eng.detach_obs(self.on_collision)
+        try:
+            self.eng.detach_obs(self.on_collision)
+        except Exception:
+            info('empty observers')
+            # it may happen during pause/menu
         EventColleague.destroy(self)
 
 

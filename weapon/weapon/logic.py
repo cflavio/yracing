@@ -1,3 +1,4 @@
+from logging import info
 from yyagl.gameobject import LogicColleague
 
 
@@ -19,7 +20,11 @@ class WeaponLogic(LogicColleague):
 
     def destroy(self):
         self.car = self.cars = None
-        self.notify('on_weapon_destroyed', self.mediator)
+        try:
+            self.notify('on_weapon_destroyed', self.mediator)
+        except TypeError:
+            info('empty observers')
+            # it may happen on pause/resume
         LogicColleague.destroy(self)
 
 

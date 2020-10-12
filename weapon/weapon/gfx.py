@@ -1,3 +1,4 @@
+from logging import info
 from panda3d.core import Vec3
 from direct.interval.LerpInterval import LerpPosInterval
 from direct.interval.IntervalGlobal import LerpFunc
@@ -32,8 +33,13 @@ class WeaponGfx(GfxColleague):
         self.gfx_np.reparent_to(parent)
 
     def destroy(self):
-        self.gfx_np.cleanup()
-        self.parent = self.gfx_np = self.gfx_np.remove_node()
+        try:
+            self.gfx_np.cleanup()
+            self.gfx_np.remove_node()
+        except AttributeError:
+            info('gfx_np: %s' % self.gfx_np)
+            # it may happen on pause/menu
+        self.parent = self.gfx_np = None
         GfxColleague.destroy(self)
 
 

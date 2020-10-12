@@ -1,3 +1,4 @@
+from logging import info
 from panda3d.bullet import BulletRigidBodyNode
 from panda3d.core import Mat4, BitMask32
 from yyagl.gameobject import PhysColleague
@@ -30,7 +31,11 @@ class WeaponPhys(PhysColleague):
     def destroy(self):
         if self.node:  # has not been fired
             self.eng.phys_mgr.remove_rigid_body(self.node)
-            self.n_p = self.n_p.remove_node()
+            try:
+                self.n_p = self.n_p.remove_node()
+            except AttributeError:
+                info('n_p: %s' % self.n_p)
+                # it may happen on pause/menu
         self.parent = None
         PhysColleague.destroy(self)
 
@@ -82,5 +87,9 @@ class RocketWeaponPhys(WeaponPhys):
 
     def destroy(self):
         if self.node: self.eng.phys_mgr.remove_collision_obj(self.node)
-        if self.update_tsk: self.update_tsk = taskMgr.remove(self.update_tsk)
+        try:
+            if self.update_tsk: self.update_tsk = taskMgr.remove(self.update_tsk)
+        except TypeError:
+            info("can't remove %s" % self.update_tsk)
+            # it may happen during pause/menu
         WeaponPhys.destroy(self)
