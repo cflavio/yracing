@@ -370,8 +370,14 @@ class CarPlayerEvent(CarEvent):
             self.props.joystick)
 
     def destroy(self):
+        evtfire = self.props.joystick[
+            'fire' + str(self.mediator.player_car_idx + 1)]
+        evtfire = 'joypad' + str(self.mediator.player_car_idx) + '-' + evtfire + '-up'
+        evtrespawn = self.props.joystick['respawn' + \
+            str(self.mediator.player_car_idx + 1)]
+        evtrespawn = 'joypad' + str(self.mediator.player_car_idx) + '-' + evtrespawn + '-up'
         keys = self.props.keys.players_keys[self.mediator.player_car_idx]
-        evts = ['f11', 'f8', 'f2', keys.fire, keys.respawn]
+        evts = ['f11', 'f8', 'f2', keys.fire, keys.respawn, evtfire, evtrespawn]
         list(map(lambda tok: tok.release(), self.toks))
         list(map(self.ignore, evts))
         CarEvent.destroy(self)

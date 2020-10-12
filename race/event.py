@@ -94,6 +94,11 @@ class RaceEvent(EventColleague):
         pass
 
     def fire_ingame_menu(self):
+        for i in range(min(self.eng.joystick_mgr.joystick_lib.num_joysticks, len(self.mediator.logic.player_cars))):
+            evtmenu = self.mediator.logic.props.joystick[
+                'menu' + str(i + 1)]
+            evtmenu = 'joypad' + str(i) + '-' + evtmenu + '-up'
+            self.ignore(evtmenu)
         self.ignore('escape-up')
         self.eng.show_cursor()
         self.ingame_menu = self.menu_cls(
