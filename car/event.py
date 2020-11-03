@@ -28,9 +28,8 @@ class PlayerKeys:
 
 class Keys:
 
-    def __init__(self, players_keys, pause):
+    def __init__(self, players_keys):
         self.players_keys = players_keys
-        self.pause = pause
 
 
 class DirKeys:

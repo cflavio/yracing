@@ -83,10 +83,6 @@ class RaceEvent(EventColleague):
         self.menu_cls = menu_cls
         self.ended_cars = []
         self.__keys = keys
-        if self.mediator.logic.props.season_props.kind in [
-                'single', 'season', 'localmp']:
-            self.accept(self.eng.lib.remap_str(keys.pause),
-                        self.eng.toggle_pause)
         self.last_sent = self.eng.curr_time  # for networking
         self.ingame_menu = None
 
@@ -100,16 +96,11 @@ class RaceEvent(EventColleague):
             evtmenu = 'joypad' + str(i) + '-' + evtmenu + '-up'
             self.ignore(evtmenu)
         self.ignore('escape-up')
-        for i in range(min(self.eng.joystick_mgr.joystick_lib.num_joysticks, len(self.mediator.logic.player_cars))):
-            evtpause = self.mediator.logic.props.joystick[
-                'pause' + str(i + 1)]
-            evtpause = 'joypad' + str(i) + '-' + evtpause + '-up'
-            self.ignore(evtpause)
-        self.ignore(self.__keys.pause)
         self.eng.show_cursor()
         self.ingame_menu = self.menu_cls(
             self.mediator.logic.props.season_props.gameprops.menu_props,
-            self.mediator.logic.props.keys)
+            self.mediator.logic.props.keys,
+            self.mediator.logic.props.season_props.kind)
         self.ingame_menu.gui.attach(self.on_ingame_back)
         self.ingame_menu.gui.attach(self.on_ingame_exit)
 
@@ -119,15 +110,6 @@ class RaceEvent(EventColleague):
         self.register_menu()
         self.eng.hide_cursor()
         self.ingame_menu = self.ingame_menu.destroy()
-        for i in range(min(self.eng.joystick_mgr.joystick_lib.num_joysticks, len(self.mediator.logic.player_cars))):
-            evtpause = self.mediator.logic.props.joystick[
-                'pause' + str(i + 1)]
-            evtpause = 'joypad' + str(i) + '-' + evtpause + '-up'
-            self.accept(evtpause, self._on_pause)
-        if self.mediator.logic.props.season_props.kind in [
-                'single', 'season', 'localmp']:
-            self.accept(self.eng.lib.remap_str(self.__keys.pause),
-                        self.eng.toggle_pause)
 
     def on_ingame_exit(self):
         self.ingame_menu.gui.detach(self.on_ingame_back)
@@ -144,11 +126,6 @@ class RaceEvent(EventColleague):
                 'menu' + str(i + 1)]
             evtmenu = 'joypad' + str(i) + '-' + evtmenu + '-up'
             self.accept(evtmenu, self.fire_ingame_menu)
-        for i in range(min(self.eng.joystick_mgr.joystick_lib.num_joysticks, len(self.mediator.logic.player_cars))):
-            evtpause = self.mediator.logic.props.joystick[
-                'pause' + str(i + 1)]
-            evtpause = 'joypad' + str(i) + '-' + evtpause + '-up'
-            self.accept(evtpause, self._on_pause)
 
     def _on_pause(self):
         self.eng.do_later(.01, self.eng.toggle_pause)
@@ -195,14 +172,11 @@ class RaceEvent(EventColleague):
 
     def destroy(self):
         for i in range(min(self.eng.joystick_mgr.joystick_lib.num_joysticks, len(self.mediator.logic.player_cars))):
-            evtpause = self.mediator.logic.props.joystick[
-                'pause' + str(i + 1)]
-            evtpause = 'joypad' + str(i) + '-' + evtpause + '-up'
             evtmenu = self.mediator.logic.props.joystick[
                 'menu' + str(i + 1)]
             evtmenu = 'joypad' + str(i) + '-' + evtmenu + '-up'
-            list(map(self.ignore, [evtpause, evtmenu]))
-        list(map(self.ignore, ['escape-up', self.__keys.pause]))
+            list(map(self.ignore, [evtmenu]))
+        list(map(self.ignore, ['escape-up']))
         EventColleague.destroy(self)
 
 
