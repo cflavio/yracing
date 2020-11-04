@@ -90,6 +90,10 @@ class RaceEvent(EventColleague):
         pass
 
     def fire_ingame_menu(self):
+        for i in range(4):
+            self.eng.joystick_mgr.joystick_lib.clear_vibration(i)
+        for car in self.mediator.logic.all_cars:
+            car.fsm.demand('Pause')
         for i in range(min(self.eng.joystick_mgr.joystick_lib.num_joysticks, len(self.mediator.logic.player_cars))):
             evtmenu = self.mediator.logic.props.joystick[
                 'menu' + str(i + 1)]
@@ -110,6 +114,8 @@ class RaceEvent(EventColleague):
         self.register_menu()
         self.eng.hide_cursor()
         self.ingame_menu = self.ingame_menu.destroy()
+        for car in self.mediator.logic.all_cars:
+            car.fsm.demand('Play')
 
     def on_ingame_exit(self):
         self.ingame_menu.gui.detach(self.on_ingame_back)

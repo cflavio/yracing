@@ -325,14 +325,14 @@ class CarLogic(LogicColleague, ComputerProxy):
         gfx = self.mediator.gfx
         is_skid = self.is_skidmarking
         (gfx.on_skidmarking if is_skid else gfx.on_no_skidmarking)()
-        if is_skid:
+        if is_skid and self.mediator.fsm.getCurrentOrNextState() == 'Play':
             self.eng.joystick_mgr.joystick_lib.set_vibration(
                 self.mediator.player_car_idx, 'skid')
         else:
             self.eng.joystick_mgr.joystick_lib.clear_vibration(
                 self.mediator.player_car_idx, 'skid')
         if not is_skid:
-            if self.mediator.phys.curr_speed_mul < .64:
+            if self.mediator.phys.curr_speed_mul < .64 and self.mediator.fsm.getCurrentOrNextState() == 'Play':
                 self.eng.joystick_mgr.joystick_lib.set_vibration(
                     self.mediator.player_car_idx, 'offroad')
             else:
