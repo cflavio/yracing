@@ -93,6 +93,7 @@ class RaceEvent(EventColleague):
         for i in range(4):
             self.eng.joystick_mgr.joystick_lib.clear_vibration(i)
         for car in self.mediator.logic.all_cars:
+            car.event.on_pause_begin()
             car.fsm.demand('Pause')
         for i in range(min(self.eng.joystick_mgr.joystick_lib.num_joysticks, len(self.mediator.logic.player_cars))):
             evtmenu = self.mediator.logic.props.joystick[
@@ -115,6 +116,7 @@ class RaceEvent(EventColleague):
         self.eng.hide_cursor()
         self.ingame_menu = self.ingame_menu.destroy()
         for car in self.mediator.logic.all_cars:
+            car.event.on_pause_end()
             car.fsm.demand('Play')
 
     def on_ingame_exit(self):

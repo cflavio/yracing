@@ -101,6 +101,12 @@ class CarEvent(EventColleague, ComputerProxy):
     def start(self):
         self.eng.attach_obs(self.on_frame)
 
+    def on_pause_begin(self):
+        pass
+
+    def on_pause_end(self):
+        pass
+
     def on_collision(self, obj, tgt_obj):
         if obj != self.mediator.gfx.nodepath.p3dnode:
             return
@@ -244,10 +250,7 @@ class CarPlayerEvent(CarEvent):
         self.label_events = [
             ('forward' + suff, keys.forward), ('left' + suff, keys.left),
             ('rear' + suff, keys.rear), ('right' + suff, keys.right)]
-        watch = inputState.watchWithModifiers
-        self.toks = list(map(
-            lambda args: watch(args[0], self.eng.lib.remap_code(args[1])),
-            self.label_events))  # arg = (lab, evt)
+        self.set_watching()
         if not self.eng.is_runtime:
             self.accept('f11', self.mediator.gui.pars.toggle)
             self.accept('f2', self.eng.gfx.gfx_mgr.screenshot)
@@ -270,6 +273,21 @@ class CarPlayerEvent(CarEvent):
         evtrespawn = 'joypad' + str(mediator.player_car_idx) + '-' + evtrespawn + '-up'
         self.accept(evtrespawn, self.process_respawn)
         # self.eng.do_later(5, lambda: self.on_bonus(Turbo) and None)
+
+    def set_watching(self):
+        watch = inputState.watchWithModifiers
+        self.toks = list(map(
+            lambda args: watch(args[0], self.eng.lib.remap_code(args[1])),
+            self.label_events))  # arg = (lab, evt)
+
+    def unset_watching(self):
+        for tok in self.toks: tok.release()
+
+    def on_pause_begin(self):
+        self.unset_watching()
+
+    def on_pause_end(self):
+        self.set_watching()
 
     def on_frame(self):
         CarEvent.on_frame(self)
