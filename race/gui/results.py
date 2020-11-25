@@ -1,6 +1,7 @@
 from panda3d.core import TextNode
 from direct.gui.OnscreenText import OnscreenText
 from direct.gui.DirectFrame import DirectFrame
+from direct.showbase.DirectObject import DirectObject
 from yyagl.lib.gui import Btn
 from yyagl.engine.gui.imgbtn import ImgBtn
 from yyagl.gameobject import GameObject
@@ -8,7 +9,7 @@ from yracing.race.event import NetMsgs
 from yracing.ranking.gui import RankingGui
 
 
-class Results(GameObject):
+class Results(GameObject, DirectObject):
 
     def __init__(self, rprops):
         GameObject.__init__(self)
@@ -83,6 +84,8 @@ class Results(GameObject):
             text=_('Continue'), pos=(0, -.6), cmd=step,
             **self.rprops.season_props.gameprops.menu_props.btn_args)
         self._buttons += [cont_btn]
+        for i in range(self.eng.joystick_mgr.joystick_lib.num_joysticks):
+            self.accept('joypad%s-face_a-up' % i, step)
 
     def destroy(self):
         if not self.result_frm or self.result_frm.isEmpty():
@@ -91,6 +94,8 @@ class Results(GameObject):
         # and race.gui's one
         list(map(lambda txt: txt.destroy(), self.__res_txts))
         list(map(lambda btn: btn.destroy(), self._buttons))
+        for i in range(self.eng.joystick_mgr.joystick_lib.num_joysticks):
+            self.ignore('joypad%s-face_a-up' % i)
         self.result_frm.destroy()
         GameObject.destroy(self)
 
