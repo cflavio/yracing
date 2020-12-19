@@ -341,6 +341,8 @@ class CarPlayerEvent(CarEvent):
         return cls
 
     def on_fire(self):
+        if self.mediator.fsm.getCurrentOrNextState() == 'Pause':
+            return
         keys = self.props.keys.players_keys[self.mediator.player_car_idx]
         # self.ignore(keys.fire)
         evtfire = self.props.joystick[
