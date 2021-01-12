@@ -285,9 +285,21 @@ class CarPlayerEvent(CarEvent):
 
     def on_pause_begin(self):
         self.unset_watching()
+        evtfire = self.props.joystick[
+            'fire' + str(self.mediator.player_car_idx + 1)]
+        evtfire = 'joypad' + str(self.mediator.player_car_idx) + '-' + evtfire + '-up'
+        keys = self.props.keys.players_keys[self.mediator.player_car_idx]
+        self.ignore(keys.fire)
+        self.ignore(evtfire)
 
     def on_pause_end(self):
         self.set_watching()
+        evtfire = self.props.joystick[
+            'fire' + str(self.mediator.player_car_idx + 1)]
+        evtfire = 'joypad' + str(self.mediator.player_car_idx) + '-' + evtfire + '-up'
+        keys = self.props.keys.players_keys[self.mediator.player_car_idx]
+        self.accept(self.eng.lib.remap_str(keys.fire), self.on_fire)
+        self.accept(evtfire, self.on_fire)
 
     def on_frame(self):
         CarEvent.on_frame(self)
