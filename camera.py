@@ -71,7 +71,8 @@ class Camera(GameObject):
         dist_diff = self.dist_max - self.dist_min
         return self.dist_min + dist_diff * self.curr_speed_ratio
 
-    def _new_pos(self, look_at_pos, back_car_vec, curr_l, c_i_length, c_i_rot):
+    def _new_pos(self, look_at_pos, back_car_vec, curr_l, c_i_length, c_i_rot,
+                 is_fast):
         d_t = globalClock.get_dt()
         cam_pos = self.get_camera().get_pos()
         vec = cam_pos - look_at_pos
@@ -85,8 +86,9 @@ class Camera(GameObject):
         #                          c_i_length * d_t)
         new_vec = rot_new_vec * curr_l
         new_pos = look_at_pos + new_vec
+        dz = Camera.speed_fast if is_fast else 8
         new_pos.z = self.new_val(cam_pos.z, look_at_pos.z + back_car_vec.z,
-                                 8 * d_t)
+                                 dz * d_t)
         return new_pos
 
     @staticmethod
@@ -142,7 +144,7 @@ class Camera(GameObject):
         c_i = curr_incr_slow if is_fast else curr_incr
         look_at_pos = car_pos + tgt_vec
         new_pos = self._new_pos(look_at_pos, back_car_vec, self.curr_dist, c_i,
-                                20)
+                                20, is_fast)
         # overwrite camera's position to set the physics
         if any(val for val in self.overwrite):
             ovw = self.overwrite
