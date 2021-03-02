@@ -193,7 +193,7 @@ class FPCamera(Camera):
     def __init__(self, car_np, cam_vec, car):
         Camera.__init__(self, car_np, cam_vec, car)
 
-    def _new_pos(self, look_at_pos, back_car_vec, curr_l, c_i_length, c_i_rot):
+    def _new_pos(self, look_at_pos, back_car_vec, curr_l, c_i_length, c_i_rot, is_fast):
         car_pos = self.car_np.get_pos()
         curr_cam_pos = car_pos + back_car_vec
         curr_occl = self.__occlusion_mesh(curr_cam_pos)
@@ -206,7 +206,7 @@ class FPCamera(Camera):
             # cam_vec = car_pos - curr_cam_pos
             look_at_pos = car_pos  # + tgt_vec
             new_pos = Camera._new_pos(self, look_at_pos, back_car_vec,
-                                      self.curr_dist, c_i_length, 20)
+                                      self.curr_dist, c_i_length, 20, is_fast)
         else:
             new_pos = occl_pos
         return new_pos
