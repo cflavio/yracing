@@ -7,9 +7,9 @@ class CarFsm(FsmColleague):
     def __init__(self, mediator, car_props, players):
         FsmColleague.__init__(self, mediator)
         self.defaultTransitions = {'Loading': ['Countdown'],
-                                   'Countdown': ['Play'],
+                                   'Countdown': ['Play', 'Pause'],
                                    'Play': ['Waiting', 'Results', 'Pause'],
-                                   'Pause': ['Play'],
+                                   'Pause': ['Play', 'Countdown'],
                                    'Waiting': ['Results']}
         self.cprops = car_props
         self.__players = players

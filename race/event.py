@@ -117,7 +117,7 @@ class RaceEvent(EventColleague):
         self.ingame_menu = self.ingame_menu.destroy()
         for car in self.mediator.logic.all_cars:
             car.event.on_pause_end()
-            car.fsm.demand('Play')
+            car.fsm.demand(self.mediator.fsm.getCurrentOrNextState())
 
     def on_ingame_exit(self):
         self.ingame_menu.gui.detach(self.on_ingame_back)
